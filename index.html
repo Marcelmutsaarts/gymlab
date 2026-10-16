@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Gymlab · lesorganisatie</title>
+<meta name="description" content="Gymlab: oefenen met lesorganisatie in bewegingsonderwijs voor ALO-studenten. Richt de zaal in en geef les aan een gesimuleerde klas.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--paper:#f4efe4;--paper2:#ebe3d2;--card:#fffaf2;--ink:#18282a;--muted:#5f6b6b;--line:#dcd3c1;--acc:#1f9d63;--acc2:#167a4c;--wood:#e2b97f;--red:#d8462f;--blue:#2f6fd6;--sun:#e7b52e}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--paper:#0f1719;--paper2:#162124;--card:#18262a;--ink:#eef0ea;--muted:#a3b0ae;--line:#2a3b3f;--acc:#3cc488;--acc2:#2fa673;--wood:#b88a52}}
+:root[data-theme="dark"]{--paper:#0f1719;--paper2:#162124;--card:#18262a;--ink:#eef0ea;--muted:#a3b0ae;--line:#2a3b3f;--acc:#3cc488;--acc2:#2fa673;--wood:#b88a52}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:"Instrument Sans",system-ui,sans-serif;line-height:1.55;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+.wrap{max-width:1180px;margin:0 auto;padding:0 24px}
+nav.top{display:flex;align-items:center;justify-content:space-between;padding:20px 0}
+.brand{display:flex;align-items:center;gap:10px;font:800 22px "Bricolage Grotesque",sans-serif;text-decoration:none}
+.brand i{display:inline-grid;place-items:center;width:34px;height:34px;border-radius:50%;background:var(--acc);color:#fff;font-style:normal;font-size:18px}
+nav.top .links{display:flex;gap:22px;font-size:14.5px;font-weight:600}nav.top .links a{text-decoration:none;color:var(--muted)}nav.top .links a:hover{color:var(--ink)}
+.hero{display:grid;grid-template-columns:1fr 1.1fr;gap:40px;align-items:center;padding:24px 0 6px}
+.eyebrow{font:600 12px "JetBrains Mono",monospace;letter-spacing:.14em;text-transform:uppercase;color:var(--acc2)}
+h1{font:800 clamp(40px,5.8vw,70px)/1 "Bricolage Grotesque",sans-serif;letter-spacing:-.03em;margin:12px 0 18px}
+h1 em{font-style:normal;color:var(--acc)}
+.lead{font-size:18px;max-width:540px}.lead.sm{font-size:16px;color:var(--muted)}
+.pills{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px}
+.pill{font-size:13.5px;font-weight:600;padding:7px 12px;border-radius:999px;background:var(--card);border:1px solid var(--line)}
+.pill b{color:var(--acc)}
+.cta{display:inline-flex;align-items:center;gap:10px;margin-top:24px;background:var(--acc);color:#fff;text-decoration:none;font-weight:700;padding:14px 20px;border-radius:12px;box-shadow:0 10px 24px -10px rgba(31,157,99,.7)}
+.cta:hover{background:var(--acc2)}
+.plan{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:14px;box-shadow:0 30px 60px -34px rgba(20,40,40,.45)}
+.plan header{display:flex;justify-content:space-between;font:600 11px "JetBrains Mono",monospace;letter-spacing:.12em;color:var(--muted);text-transform:uppercase;padding:2px 4px 10px}
+.plan svg{width:100%;height:auto;display:block}
+.st{cursor:pointer}
+.st circle.s{stroke:#fff;stroke-width:3}
+.st.off circle.s{fill:#fffaf2!important;stroke:#7a8585;stroke-width:1.8;stroke-dasharray:4 3}
+.st text{font:800 14px "Bricolage Grotesque",sans-serif;fill:#fff;text-anchor:middle;dominant-baseline:central;pointer-events:none}
+.st.off text{fill:#5f6b6b}
+.st .ring{fill:none;stroke:#1f9d63;stroke-width:3;opacity:0}
+.st:not(.off) .ring{animation:ring 2.2s infinite}
+@keyframes ring{0%{opacity:.8;r:15}100%{opacity:0;r:32}}
+.st:hover circle.s,.st.hl circle.s{stroke:#e7b52e;stroke-width:4}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:12.5px;color:var(--muted);padding:10px 4px 0}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:50%;vertical-align:-2px;margin-right:6px}
+section{padding:60px 0 6px}
+h2{font:800 clamp(30px,3.6vw,42px)/1.05 "Bricolage Grotesque",sans-serif;letter-spacing:-.02em;margin:6px 0 10px}
+.sub{color:var(--muted);max-width:680px;margin:0 0 22px;font-size:16px}
+.filters{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:20px}
+.filters select,.filters input[type=search]{font:inherit;font-size:14px;background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:9px 12px}
+.filters label{font-size:14px;display:flex;gap:6px;align-items:center}
+.count{margin-left:auto;font-size:13.5px;color:var(--muted)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:14px}
+.act{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:8px;transition:border-color .15s,transform .15s}
+.act .n{font:700 12px "JetBrains Mono",monospace;color:var(--muted)}
+.act h4{margin:0;font:700 20px/1.15 "Bricolage Grotesque",sans-serif}
+.act p{margin:0;font-size:14px;color:var(--muted)}
+.act.off{background:transparent;border-style:dashed}.act.off h4{color:var(--muted)}
+.act.hl{border-color:var(--acc);transform:translateY(-2px)}
+.soon{font:600 11px "JetBrains Mono",monospace;color:var(--muted);letter-spacing:.06em}
+.tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:auto;padding-top:6px}
+.tag{font-size:11.5px;font-weight:600;padding:3px 8px;border-radius:999px;background:var(--paper2);border:1px solid var(--line)}
+.feat{grid-column:1/-1;display:grid;grid-template-columns:1.05fr 1fr;border:2px solid var(--acc);border-radius:20px;overflow:hidden;background:var(--card);padding:0}
+.feat .vis{background:#152126;position:relative;min-height:300px;display:block}
+.feat .vis svg{position:absolute;inset:0;width:100%;height:100%}
+.feat .txt{padding:22px 24px;display:flex;flex-direction:column;gap:10px}
+.feat .txt h4{font-size:30px}
+.feat .kind{font:600 12px "JetBrains Mono",monospace;letter-spacing:.08em;color:var(--acc2);text-transform:uppercase}
+.feat ul{margin:0;padding-left:18px;font-size:14.5px}.feat li{margin:3px 0}
+details{font-size:14px}summary{cursor:pointer;font-weight:700;color:var(--acc2)}
+.open{align-self:flex-start;display:inline-flex;gap:8px;align-items:center;background:var(--acc);color:#fff;text-decoration:none;font-weight:700;padding:12px 18px;border-radius:11px;margin-top:4px}
+.open:hover{background:var(--acc2)}
+.cols3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px}
+.box .meta{font:600 11.5px "JetBrains Mono",monospace;letter-spacing:.08em;color:var(--acc2);text-transform:uppercase}
+.box h3{margin:4px 0 6px;font:700 21px "Bricolage Grotesque",sans-serif}
+.box p,.box li{font-size:14.5px;color:var(--muted)}.box ul{padding-left:18px;margin:8px 0 0}
+table{width:100%;border-collapse:collapse;font-size:14px;margin-top:16px;background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+th,td{text-align:left;padding:9px 14px;border-bottom:1px solid var(--line)}
+th{font:600 12px "JetBrains Mono",monospace;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);background:var(--paper2)}
+kbd{font:600 12px "JetBrains Mono",monospace;background:var(--paper2);border:1px solid var(--line);border-radius:5px;padding:1px 6px}
+.priv{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.priv div{border-top:3px solid var(--acc);padding-top:8px;font-size:14px;color:var(--muted)}.priv b{display:block;color:var(--ink);font-size:15px}
+footer{padding:54px 0 40px;color:var(--muted);font-size:13.5px}
+@media (max-width:960px){.hero{grid-template-columns:1fr}.feat{grid-template-columns:1fr}.cols3,.priv{grid-template-columns:1fr 1fr}nav.top .links{display:none}}
+@media (max-width:560px){.wrap{padding:0 16px}.cols3,.priv{grid-template-columns:1fr}.count{margin-left:0}.filters input[type=search]{flex:1 1 100%}th,td{padding:7px 8px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav class="top"><a class="brand" href="#"><i>G</i>Gymlab</a><div class="links"><a href="#onderwerpen">Onderwerpen</a><a href="#docenten">Voor docenten</a><a href="#privacy">Privacy</a></div></nav>
+  <header class="hero">
+    <div>
+      <div class="eyebrow">Bewegingsonderwijs · lesorganisatie · ALO</div>
+      <h1>Oefen de les <em>voordat</em> je in de zaal staat.</h1>
+      <p class="lead">In Gymlab richt je een gymzaal in en geef je les aan een gesimuleerde klas uit het basisonderwijs. Je ziet direct wat je keuzes doen met bewegingstijd, veiligheid, overzicht en rust.</p>
+      <p class="lead sm">Elk onderwerp is een plek in de zaal. De eerste staat klaar: het 3-vakkensysteem, met een klas van 18 tot 32 leerlingen die zich gedragen zoals echte kinderen.</p>
+      <div class="pills"><span class="pill"><b>4</b> criteria in balans</span><span class="pill"><b>9</b> toestellen</span><span class="pill"><b>6</b> leerlingtypen</span><span class="pill"><b>7</b> missies</span></div>
+      <a class="cta" href="zaal.html">Open De Zaal: het 3-vakkensysteem →</a>
+    </div>
+    <figure class="plan" style="margin:0">
+      <header><span>Plattegrond · gymlokaal 22 × 14 m</span><span>vak 1 · 2 · 3</span></header>
+      <svg viewBox="0 0 660 440" role="img" aria-label="Plattegrond van een gymzaal met tien onderwerpen">
+        <defs><pattern id="planks" width="60" height="14" patternUnits="userSpaceOnUse"><rect width="60" height="14" fill="#e6c08a"/><path d="M0 13.5H60M37 0V14" stroke="#c99a5c" stroke-width="1"/></pattern></defs>
+        <rect x="10" y="10" width="640" height="420" rx="10" fill="#33474d"/>
+        <rect x="30" y="30" width="600" height="380" fill="url(#planks)"/>
+        <rect x="56" y="56" width="548" height="328" fill="none" stroke="#d8462f" stroke-width="3"/><circle cx="330" cy="220" r="48" fill="none" stroke="#d8462f" stroke-width="3"/>
+        <path d="M230 30V410M430 30V410" stroke="#fff" stroke-width="3" stroke-dasharray="10 8" opacity=".9"/>
+        <g font-family="JetBrains Mono" font-size="13" font-weight="700" fill="#18282a"><text x="130" y="50" text-anchor="middle">VAK 1</text><text x="330" y="50" text-anchor="middle">VAK 2</text><text x="530" y="50" text-anchor="middle">VAK 3</text></g>
+        <!-- windows -->
+        <g fill="#bfe0ff"><rect x="60" y="22" width="70" height="8"/><rect x="160" y="22" width="70" height="8"/><rect x="260" y="22" width="70" height="8"/><rect x="360" y="22" width="70" height="8"/><rect x="460" y="22" width="70" height="8"/><rect x="560" y="22" width="60" height="8"/></g>
+        <!-- vak 1: kast + mat + bok -->
+        <rect x="70" y="200" width="56" height="30" rx="3" fill="#8a5f36"/><rect x="76" y="236" width="44" height="64" rx="3" fill="#3c4a63"/><rect x="150" y="205" width="40" height="22" rx="4" fill="#e8d7b4" stroke="#6b3f22" stroke-width="2"/><rect x="146" y="234" width="48" height="58" rx="3" fill="#2f5fb8"/>
+        <path d="M98 110V190M170 120V196" stroke="#18282a" stroke-width="2" stroke-dasharray="5 5"/><path d="M92 186l6 10 6-10z" fill="#18282a"/><path d="M164 190l6 10 6-10z" fill="#18282a"/>
+        <!-- vak 2: ringen -->
+        <rect x="270" y="150" width="46" height="120" rx="3" fill="#2f5fb8"/><rect x="346" y="150" width="46" height="120" rx="3" fill="#2f5fb8"/>
+        <g fill="none" stroke="#7a4b24" stroke-width="4"><circle cx="286" cy="210" r="7"/><circle cx="300" cy="210" r="7"/><circle cx="362" cy="210" r="7"/><circle cx="376" cy="210" r="7"/></g>
+        <!-- vak 3: banken + balk -->
+        <rect x="470" y="140" width="12" height="150" rx="2" fill="#c89a5c"/><rect x="520" y="140" width="8" height="150" rx="2" fill="#8a5f36"/><rect x="566" y="140" width="34" height="150" rx="3" fill="#2f5fb8" opacity=".85"/><rect x="580" y="140" width="6" height="150" fill="#c89a5c"/>
+        <!-- wandrek -->
+        <g stroke="#c89a5c" stroke-width="3"><path d="M60 412H340"/><path d="M70 405v12M100 405v12M130 405v12M160 405v12M190 405v12M220 405v12M250 405v12M280 405v12M310 405v12"/></g>
+        <!-- teacher + cone -->
+        <path d="M200 395 L60 160 A260 260 0 0 1 380 170 Z" fill="#ffd23c" opacity=".18"/>
+        <circle cx="200" cy="395" r="11" fill="#ffd23c" stroke="#18282a" stroke-width="2.5"/>
+        <!-- kids -->
+        <g>${''}</g>
+        <g id="kids"></g>
+        <g id="stops"></g>
+        <text x="640" y="225" font-family="JetBrains Mono" font-size="11" fill="#fff" transform="rotate(90 640 225)" text-anchor="middle">BERGING</text>
+      </svg>
+      <div class="legend"><span><i style="background:var(--acc)"></i>Onderwerp beschikbaar</span><span><i style="border:1.5px dashed #7a8585"></i>Nog in ontwikkeling</span><span><i style="background:#ffd23c"></i>blikveld van de docent</span></div>
+    </figure>
+  </header>
+
+  <section id="onderwerpen">
+    <div class="eyebrow">Tien onderwerpen</div>
+    <h2>Lesorganisatie in de gymzaal</h2>
+    <p class="sub">Van inrichten tot observeren: de onderwerpen sluiten aan bij wat een vakleerkracht bewegingsonderwijs elke les doet. De eerste is uitgewerkt als simulatie.</p>
+    <div class="filters">
+      <select id="fCat" aria-label="Thema"><option value="">Alle thema’s</option><option>Organiseren</option><option>Begeleiden</option><option>Didactiek</option></select>
+      <select id="fYear" aria-label="Studiejaar"><option value="">Alle jaren</option><option value="1">ALO-jaar 1</option><option value="2">ALO-jaar 2</option></select>
+      <label><input type="checkbox" id="fAvail"> Alleen beschikbaar</label>
+      <input type="search" id="fQ" placeholder="Zoeken, bijv. hulpverlenen" aria-label="Zoeken">
+      <span class="count" id="count"></span>
+    </div>
+    <div class="grid" id="grid"></div>
+  </section>
+
+  <section id="docenten">
+    <div class="eyebrow">Voor docenten</div>
+    <h2>Zo zet je De Zaal in</h2>
+    <p class="sub">Geen account nodig. Deel de link in de ELO of open de simulatie op het digibord. Studenten werken in twee stappen: eerst inrichten, dan lesgeven.</p>
+    <div class="cols3">
+      <div class="box"><div class="meta">Zelfstandig · 20 min</div><h3>Inrichten en proberen</h3><p>Studenten laden een voorbeeldles, passen de opstelling aan en geven les. Het lesrapport laat zien wat er beter kan. Daarna nog een keer: vorige en nieuwe score staan naast elkaar.</p></div>
+      <div class="box"><div class="meta">Tweetallen · 30–45 min</div><h3>Missies</h3><p>Zeven missies volgens RTTI: fouten zoeken in de fouten-zaal, beurten narekenen, de bewegingstijd verhogen, het dilemma hulpverlenen of overzicht, een drukke klas, en tot slot een eigen lesontwerp verantwoorden.</p></div>
+      <div class="box"><div class="meta">Werkcollege · digibord</div><h3>Samen kijken</h3><p>Zet de docent midden in de zaal en laat de groep voorspellen wat er gebeurt. Speel de les af op ×20, pauzeer bij een incident en bespreek: had je dit kunnen zien aankomen?</p><ul><li>Klik op een leerling voor type, beurten en onrust.</li></ul></div>
+    </div>
+    <table><thead><tr><th>Toets</th><th>De Zaal</th></tr></thead><tbody>
+      <tr><td><kbd>1</kbd> <kbd>2</kbd></td><td>Inrichten · lesgeven</td></tr>
+      <tr><td><kbd>R</kbd> · <kbd>Del</kbd></td><td>Geselecteerd toestel draaien · verwijderen</td></tr>
+      <tr><td><kbd>Spatie</kbd></td><td>Les pauzeren of hervatten</td></tr>
+      <tr><td><kbd>→</kbd> <kbd>←</kbd></td><td>Volgend of vorig uitlegpunt (werkt met een clicker)</td></tr>
+      <tr><td><kbd>G</kbd> · <kbd>L</kbd></td><td>Geluid (fluitje, zaalgeluid) · labels</td></tr>
+    </tbody></table>
+    <p class="sub" style="margin-top:16px"><b>Let op:</b> De Zaal is een leermodel. Gedrag van leerlingen, risico’s en tijden zijn vereenvoudigd om het effect van keuzes zichtbaar te maken. Het vervangt geen veiligheidsrichtlijnen, vakwerkplan of de eigen beoordeling van de docent.</p>
+  </section>
+
+  <section id="privacy">
+    <div class="eyebrow">Privacy</div>
+    <h2>Veilig oefenen</h2>
+    <div class="priv"><div><b>Geen account</b>Studenten hoeven niet in te loggen.</div><div><b>Geen tracking</b>Geen analyse- of advertentiesoftware.</div><div><b>Fictieve klas</b>Alle leerlingen en namen zijn verzonnen.</div><div><b>Niets bewaard</b>Antwoorden en scores verdwijnen bij sluiten.</div></div>
+  </section>
+  <footer>Proof of concept · Gymlab, leeromgeving lesorganisatie bewegingsonderwijs voor de ALO · Lettertypen via Google Fonts, 3D-techniek (three.js) via jsDelivr.</footer>
+</div>
+<script>
+const TOP=[
+ {n:1,x:330,y:110,cat:'Organiseren',yr:[1],t:'Het 3-vakkensysteem',s:'Richt de zaal in voor drie groepjes en geef les aan een gesimuleerde klas. Bewegingstijd, veiligheid, overzicht en rust in balans.',url:'zaal.html',k:'drie vakken inrichten opstelling docentpositie overzicht veiligheid valzone simulatie klas'},
+ {n:2,x:130,y:140,cat:'Organiseren',yr:[1],t:'Groepjes maken & differentiëren',s:'Op niveau of gemengd? Hoe maak je snel groepjes, en hoe bied je per vak verschillende uitvoeringsmogelijkheden?',k:'groepjes niveau differentiatie'},
+ {n:3,x:250,y:330,cat:'Didactiek',yr:[1],t:'Instructie in de gymzaal',s:'Waar zit de klas, hoe lang praat je, en wat laat je eerst zien? Kort en krachtig uitleggen.',k:'instructie uitleg voordoen'},
+ {n:4,x:98,y:268,cat:'Begeleiden',yr:[1,2],t:'Hulpverlenen bij springen',s:'Begeleiden, ondersteunen en vangen bij kast, bok en minitrampoline. Waar sta je, en hoe pak je vast?',k:'hulpverlenen vangen springen kast bok trampoline'},
+ {n:5,x:170,y:262,cat:'Organiseren',yr:[1],t:'Veiligheid & valzones',s:'Matten, uitloop, afstanden en looproutes. Herken onveilige situaties voordat ze gebeuren.',k:'veiligheid matten valzone uitloop'},
+ {n:6,x:520,y:330,cat:'Didactiek',yr:[1,2],t:'Spelvormen & veldindeling',s:'Tikspelen, doelspelen en terugslagspelen: hoe deel je het veld in, en hoeveel spelers per veld?',k:'spel veld tikspel doelspel'},
+ {n:7,x:610,y:95,cat:'Organiseren',yr:[1],t:'Opbouwen & opruimen',s:'Materiaalbeheer met leerlingen: wie pakt wat, in welke volgorde, en hoe snel staat alles klaar?',k:'opbouwen opruimen materiaal berging'},
+ {n:8,x:200,y:395,cat:'Begeleiden',yr:[2],t:'Observeren & feedback',s:'Waar let je op bij balanceren of klimmen, en hoe geef je feedback terwijl je overzicht houdt?',k:'observeren feedback bewegingsanalyse'},
+ {n:9,x:460,y:215,cat:'Didactiek',yr:[1,2],t:'Leerlijnen bewegingsonderwijs',s:'Balanceren, klimmen, zwaaien, springen, rollen, mikken, jongleren, bewegen op muziek: van groep 3 tot 8.',k:'leerlijnen basisdocument balanceren klimmen zwaaien'},
+ {n:10,x:400,y:300,cat:'Begeleiden',yr:[2],t:'Bewegen & regelen',s:'Leerlingen als scheidsrechter, hulpverlener of organisator: zo leren ze verantwoordelijkheid in de les.',k:'regelen scheidsrechter verantwoordelijkheid'},
+];
+const kids=document.getElementById('kids');const cols=['#e5483b','#2f6fd6','#f2c12e'];
+for(let i=0;i<27;i++){const g=i%3;const bx=[95,330,525][g],by=[95,105,110][g];const x=bx+((i/3)%3-1)*22+(Math.floor(i/9)-1)*8,y=by+Math.floor(i/9)*16;kids.insertAdjacentHTML('beforeend',`<circle cx="${x}" cy="${y}" r="6" fill="${cols[g]}" stroke="#18282a" stroke-width="1.5"/>`);}
+const stops=document.getElementById('stops');
+TOP.forEach(a=>{const g=document.createElementNS('http://www.w3.org/2000/svg','g');g.setAttribute('class','st'+(a.url?'':' off'));g.dataset.n=a.n;
+  g.innerHTML=`<circle class="ring" cx="${a.x}" cy="${a.y}" r="15"/><circle class="s" cx="${a.x}" cy="${a.y}" r="15" fill="${a.url?'#1f9d63':'#fff'}"/><text x="${a.x}" y="${a.y+1}">${a.n}</text><title>${a.n}. ${a.t}${a.url?'':' (in ontwikkeling)'}</title>`;
+  g.addEventListener('click',()=>{if(a.url){location.href=a.url;return;}const el=document.querySelector(`.act[data-n="${a.n}"]`);if(el){el.scrollIntoView({behavior:'smooth',block:'center'});el.classList.add('hl');setTimeout(()=>el.classList.remove('hl'),1600);}});
+  g.addEventListener('mouseenter',()=>{const el=document.querySelector(`.act[data-n="${a.n}"]`);if(el)el.classList.add('hl');});g.addEventListener('mouseleave',()=>{const el=document.querySelector(`.act[data-n="${a.n}"]`);if(el)el.classList.remove('hl');});
+  stops.appendChild(g);});
+const feat=a=>`<article class="act feat" data-n="${a.n}"><a class="vis" href="${a.url}" aria-label="Open ${a.t}"><svg viewBox="0 0 400 300" aria-hidden="true">
+  <rect width="400" height="300" fill="#152126"/><rect x="40" y="60" width="320" height="200" fill="#e2b97f"/><path d="M146 60v200M253 60v200" stroke="#fff" stroke-width="2" stroke-dasharray="7 6"/>
+  <rect x="58" y="140" width="34" height="18" fill="#8a5f36"/><rect x="62" y="162" width="26" height="40" fill="#3c4a63"/><rect x="104" y="146" width="24" height="14" fill="#e8d7b4"/><rect x="100" y="164" width="32" height="34" fill="#2f5fb8"/>
+  <rect x="170" y="120" width="26" height="80" fill="#2f5fb8"/><rect x="204" y="120" width="26" height="80" fill="#2f5fb8"/><rect x="276" y="110" width="8" height="100" fill="#c89a5c"/><rect x="304" y="110" width="5" height="100" fill="#8a5f36"/><rect x="326" y="110" width="20" height="100" fill="#ff5a4a" opacity=".35"/>
+  <path d="M200 258 L70 100 A200 200 0 0 1 340 110 Z" fill="#ffd23c" opacity=".22"/><circle cx="200" cy="258" r="8" fill="#ffd23c" stroke="#152126" stroke-width="2"/>
+  ${Array.from({length:27},(_,i)=>{const g=i%3;const x=[90,200,310][g]+((i*37)%40-20),y=[95,90,92][g]+((i*53)%30);return `<circle cx="${x}" cy="${y}" r="4.5" fill="${cols[g]}" stroke="#152126" stroke-width="1"/>`;}).join('')}
+  <g font-family="JetBrains Mono" font-size="10.5" fill="#f2eee6"><rect x="12" y="12" width="118" height="34" rx="6" fill="rgba(14,20,24,.85)" stroke="rgba(95,211,141,.6)"/><text x="20" y="26">BEWEGINGSTIJD</text><text x="20" y="40" font-size="13" font-weight="700" fill="#5fd38d">64%</text>
+  <rect x="268" y="12" width="120" height="34" rx="6" fill="rgba(14,20,24,.85)" stroke="rgba(255,90,74,.7)"/><text x="276" y="26">INCIDENT</text><text x="276" y="40" font-size="12" font-weight="700" fill="#ff5a4a">gemist!</text></g></svg></a>
+  <div class="txt"><span class="kind">★ Onderwerp 1 · 3D-simulatie · uitgewerkt</span><h4>${a.t}</h4><p>${a.s}</p>
+   <ul><li><b>Inrichten:</b> 9 toestellen, varianten, matten, valzones, uitloop en looproutes, met een live veiligheidscheck</li><li><b>Lesgeven:</b> uitleg, drie rondes en doordraaien, met een klas van 18–32 leerlingen (druk, voorzichtig, dromer, uitblinker, DCD)</li><li><b>Docent:</b> versleep jezelf, zie je blikveld, kies of je hulpverleent</li><li><b>Lesrapport:</b> bewegen, veiligheid, overzicht en rust in balans, met tips</li></ul>
+   <details><summary>Leerdoelen en lestip</summary><ul><li>Je richt een gymzaal veilig en doelmatig in volgens het 3-vakkensysteem.</li><li>Je kiest een docentpositie die overzicht en hulpverlening combineert.</li><li>Je verklaart hoe wachttijd, onrust en veiligheid met elkaar samenhangen.</li><li>Je verantwoordt een opstelling met bewegingstijd, veiligheid, overzicht en rust.</li></ul><p style="margin:8px 0 0"><b>Lestip:</b> laat studenten eerst de fouten-zaal ‘repareren’ en daarna een eigen les ontwerpen voor hun stageklas. Vergelijk de lesrapporten in de groep.</p></details>
+   <div class="tags"><span class="tag">Organiseren</span><span class="tag">Basisonderwijs</span><span class="tag">ALO-jaar 1</span></div>
+   <a class="open" href="${a.url}">Open De Zaal →</a></div></article>`;
+const card=a=>`<article class="act off" data-n="${a.n}"><span class="n">${String(a.n).padStart(2,'0')}</span><h4>${a.t}</h4><p>${a.s}</p><span class="soon">IN ONTWIKKELING</span><div class="tags"><span class="tag">${a.cat}</span><span class="tag">ALO-jaar ${a.yr.join('–')}</span></div></article>`;
+const fCat=document.getElementById('fCat'),fYear=document.getElementById('fYear'),fAvail=document.getElementById('fAvail'),fQ=document.getElementById('fQ');
+function render(){const c=fCat.value,y=fYear.value,av=fAvail.checked,q=fQ.value.trim().toLowerCase();
+  const vis=TOP.filter(a=>(!c||a.cat===c)&&(!y||a.yr.includes(+y))&&(!av||a.url)&&(!q||(a.t+' '+a.s+' '+a.k).toLowerCase().includes(q)));
+  document.getElementById('grid').innerHTML=vis.map(a=>a.url?feat(a):card(a)).join('')||'<p class="sub">Geen onderwerpen gevonden.</p>';
+  document.getElementById('count').textContent=`${vis.length} onderwerpen · ${vis.filter(a=>a.url).length} beschikbaar`;
+  stops.querySelectorAll('.st').forEach(g=>g.style.opacity=vis.some(a=>a.n==g.dataset.n)?1:.3);}
+[fCat,fYear,fAvail,fQ].forEach(el=>el.addEventListener('input',render));render();
+</script>
+</body>
+</html>

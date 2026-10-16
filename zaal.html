@@ -1,0 +1,983 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>De Zaal · Gymlab</title>
+<meta name="description" content="Richt een gymzaal in volgens het 3-vakkensysteem en geef les aan een gesimuleerde klas: bewegingstijd, veiligheid, overzicht en rust.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg1:#0b1215;--ink:#f2eee6;--muted:#a5afb2;--panel:rgba(14,20,24,.88);--panel2:rgba(20,28,33,.95);--line:rgba(242,238,230,.14);--line2:rgba(242,238,230,.3);
+  --acc:#2bb673;--acc2:#1f8f59;--sun:#ffcb3d;--red:#ff5a4a;--org:#ff9a3d;--blue:#4c8dff;--ok:#5fd38d;--r:10px}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden;background:var(--bg1);color:var(--ink);font-family:"Instrument Sans",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+button,select,input{font:inherit;color:inherit}
+select{background:rgba(255,255,255,.06);border:1px solid var(--line);border-radius:8px;padding:6px 8px;color:var(--ink)}
+select option{color:#111}
+#app{position:fixed;inset:0;background:radial-gradient(120% 90% at 55% 35%,#27363d 0%,#152126 55%,#080d10 100%)}
+#c{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
+#vignette{position:absolute;inset:0;pointer-events:none;background:radial-gradient(130% 100% at 50% 45%,transparent 60%,rgba(0,0,0,.5) 100%)}
+#top{position:absolute;left:16px;right:16px;top:14px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;pointer-events:none;z-index:6}
+#top>*{pointer-events:auto}
+.title a{color:var(--muted);text-decoration:none;font:12px "JetBrains Mono",monospace;letter-spacing:.08em;text-transform:uppercase}
+.title a:hover{color:var(--ink)}
+.title h1{margin:2px 0 0;font:800 32px/1.02 "Bricolage Grotesque",sans-serif;letter-spacing:-.01em;text-shadow:0 2px 16px rgba(0,0,0,.5)}
+.title h1 span{color:var(--acc)}
+.title p{margin:4px 0 0;color:var(--muted);font-size:13.5px}
+.tools{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.seg{display:flex;background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:3px;gap:2px;backdrop-filter:blur(8px)}
+.seg button{border:0;background:none;padding:8px 13px;border-radius:7px;cursor:pointer;font-weight:700;font-size:13.5px;color:#d9d5cc;white-space:nowrap}
+.seg button.on{background:var(--acc);color:#06140c}
+.btn{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line);background:var(--panel);padding:8px 12px;border-radius:var(--r);cursor:pointer;font-weight:600;font-size:13px;backdrop-filter:blur(8px);white-space:nowrap}
+.btn:hover{border-color:var(--line2)}
+.btn.on{background:var(--ink);color:#141414;border-color:var(--ink)}
+.btn.acc{background:var(--acc);border-color:var(--acc);color:#06140c}
+.btn.red{background:rgba(255,90,74,.15);border-color:rgba(255,90,74,.5)}
+.btn svg{width:16px;height:16px}
+.btn:disabled{opacity:.4;cursor:default}
+
+#left{position:absolute;left:16px;top:112px;bottom:16px;width:262px;display:flex;flex-direction:column;background:var(--panel);border:1px solid var(--line);border-radius:14px;z-index:5;backdrop-filter:blur(10px);overflow:hidden}
+.ltabs{display:flex;border-bottom:1px solid var(--line)}
+.ltabs button{flex:1;border:0;background:none;padding:10px 4px;font-weight:700;font-size:12.5px;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent}
+.ltabs button.on{color:var(--ink);border-color:var(--acc)}
+.lbody{flex:1;overflow:auto;padding:12px;display:flex;flex-direction:column;gap:9px;scrollbar-width:thin}
+.lbody h4{margin:6px 0 0;font:600 10.5px "JetBrains Mono",monospace;letter-spacing:.12em;color:var(--muted);text-transform:uppercase}
+.tool-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.tool{display:flex;flex-direction:column;align-items:flex-start;gap:2px;border:1px solid var(--line);background:rgba(255,255,255,.03);border-radius:9px;padding:7px 8px;cursor:pointer;text-align:left}
+.tool:hover{border-color:var(--line2);background:rgba(255,255,255,.06)}
+.tool.on{border-color:var(--acc);background:rgba(43,182,115,.14)}
+.tool b{font-size:12.5px}
+.tool small{font-size:10.5px;color:var(--muted)}
+.tool i{font-style:normal;font:600 9.5px "JetBrains Mono",monospace;letter-spacing:.06em;padding:1px 5px;border-radius:4px;margin-top:2px}
+.r0{background:rgba(95,211,141,.18);color:#9fe6bb}.r1{background:rgba(95,211,141,.18);color:#9fe6bb}.r2{background:rgba(255,203,61,.18);color:#ffd977}.r3{background:rgba(255,154,61,.2);color:#ffb878}.r4{background:rgba(255,90,74,.2);color:#ff9d92}
+.card{border:1px solid var(--line);border-radius:10px;padding:9px 10px;background:rgba(255,255,255,.03);font-size:12.5px}
+.card .row{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:4px 0}
+.card .row label{color:var(--muted)}
+.card output{font:600 12px "JetBrains Mono",monospace;color:var(--sun)}
+.card input[type=range]{width:100%;accent-color:var(--acc)}
+.tg{display:flex;align-items:center;gap:9px;cursor:pointer;font-size:12.5px;user-select:none;margin:5px 0}
+.tg input{appearance:none;width:30px;height:17px;border-radius:9px;background:rgba(255,255,255,.18);position:relative;flex:none;cursor:pointer;margin:0}
+.tg input::after{content:"";position:absolute;left:2px;top:2px;width:13px;height:13px;border-radius:50%;background:#fff;transition:left .2s}
+.tg input:checked{background:var(--acc)}.tg input:checked::after{left:15px}
+.issue{display:flex;gap:8px;align-items:flex-start;border:1px solid var(--line);border-radius:9px;padding:7px 9px;font-size:12.5px;cursor:pointer;line-height:1.35;background:rgba(255,255,255,.02)}
+.issue:hover{border-color:var(--line2)}
+.issue b{flex:none;width:9px;height:9px;border-radius:50%;margin-top:4px}
+.issue.crit b{background:var(--red)}.issue.warn b{background:var(--org)}.issue.ok b{background:var(--ok)}
+.vakrow{display:grid;grid-template-columns:auto 1fr;gap:2px 8px;font-size:12px}
+.vakrow span{color:var(--muted)}
+.hint{font-size:12px;color:var(--muted);line-height:1.45;margin:0}
+
+#markers{position:absolute;inset:0;pointer-events:none;z-index:3;overflow:hidden}
+.mk{position:absolute;left:0;top:0;pointer-events:auto;display:flex;align-items:center;gap:6px;border:0;background:none;padding:0;cursor:pointer;will-change:transform}
+.mk b{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:var(--acc);color:#06140c;font:800 12.5px "Instrument Sans";box-shadow:0 0 0 3px rgba(43,182,115,.3),0 4px 12px rgba(0,0,0,.5)}
+.mk:hover b,.mk.on b{background:var(--sun)}
+.mk span{display:none;background:var(--panel);border:1px solid var(--line);padding:3px 8px;border-radius:6px;font-size:12px;font-weight:600;white-space:nowrap}
+body.lbl-names .mk span{display:block}body.lbl-off .mk{display:none}
+.vl{position:absolute;left:0;top:0;font:800 12px "JetBrains Mono",monospace;letter-spacing:.08em;padding:3px 8px;border-radius:6px;background:rgba(8,12,14,.7);border:1px solid var(--line);pointer-events:none;white-space:nowrap}
+.inc{position:absolute;left:0;top:0;pointer-events:none;font:700 11.5px "Instrument Sans";padding:4px 8px;border-radius:7px;white-space:nowrap;box-shadow:0 4px 14px rgba(0,0,0,.4)}
+.inc.miss{background:#d93a2c;color:#fff;animation:blink .8s infinite}
+.inc.seen{background:var(--org);color:#1a0d00}
+@keyframes blink{50%{opacity:.6}}
+.slabel{position:absolute;left:0;top:0;pointer-events:none;font:600 10.5px "Instrument Sans";padding:2px 6px;border-radius:5px;background:rgba(8,12,14,.75);white-space:nowrap}
+
+.panel{position:absolute;right:16px;top:112px;width:370px;max-height:calc(100% - 250px);display:none;flex-direction:column;background:var(--panel2);border:1px solid var(--line);border-radius:14px;z-index:7;backdrop-filter:blur(10px);box-shadow:0 20px 50px rgba(0,0,0,.5);overflow:hidden}
+.panel.open{display:flex;animation:slidein .3s cubic-bezier(.2,.8,.2,1)}
+@keyframes slidein{from{opacity:0;transform:translateX(16px)}}
+.ph{display:flex;gap:12px;align-items:flex-start;padding:15px 16px 9px}
+.ph .num{flex:none;width:32px;height:32px;border-radius:50%;background:var(--acc);color:#06140c;display:grid;place-items:center;font-weight:800}
+.ph h2{margin:0;font:800 22px/1.1 "Bricolage Grotesque",sans-serif}
+.ph .lat{margin:3px 0 0;font:12px "JetBrains Mono",monospace;color:var(--muted)}
+.x{margin-left:auto;border:0;background:rgba(255,255,255,.06);width:30px;height:30px;border-radius:8px;cursor:pointer;flex:none;font-size:18px;line-height:1}
+.tabs{display:flex;gap:4px;padding:0 16px;border-bottom:1px solid var(--line)}
+.tabs button{border:0;background:none;padding:9px 7px 10px;cursor:pointer;font-weight:600;font-size:13px;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-1px}
+.tabs button.on{color:var(--ink);border-color:var(--acc)}
+.pb{padding:13px 16px 6px;overflow:auto;font-size:14.5px;line-height:1.56}
+.pb p{margin:0 0 10px}
+.pb .think{border-left:3px solid var(--sun);padding:8px 12px;background:rgba(255,203,61,.08);border-radius:0 8px 8px 0}
+.pb .calc{font:13px/1.55 "JetBrains Mono",monospace;background:rgba(255,255,255,.05);border-radius:8px;padding:9px 11px}
+.pf{display:flex;justify-content:space-between;align-items:center;padding:10px 16px 14px;border-top:1px solid var(--line);font-size:12.5px;color:var(--muted)}
+.pf button{border:1px solid var(--line);background:none;padding:6px 10px;border-radius:8px;cursor:pointer;font-weight:600;font-size:12.5px}
+.qtag{display:inline-block;font:600 11px "JetBrains Mono",monospace;padding:3px 7px;border-radius:5px;background:rgba(255,203,61,.16);color:var(--sun);margin-right:6px}
+.dots{display:flex;gap:5px;margin:2px 0 12px}.dots i{width:24px;height:5px;border-radius:3px;background:rgba(255,255,255,.12)}.dots i.ok{background:var(--ok)}.dots i.no{background:var(--red)}.dots i.cur{background:var(--sun)}
+.qprompt{font-size:15px;font-weight:600;margin:0 0 12px;line-height:1.45}
+.opts{display:flex;flex-direction:column;gap:7px}
+.opts button,.opts label{text-align:left;border:1px solid var(--line);background:rgba(255,255,255,.03);padding:9px 11px;border-radius:9px;cursor:pointer;font-size:13.5px;line-height:1.35;display:flex;gap:8px;align-items:flex-start}
+.opts button b{font-family:"JetBrains Mono",monospace;color:var(--sun)}
+.opts .right{border-color:var(--ok);background:rgba(95,211,141,.14)}.opts .wrong{border-color:var(--red);background:rgba(255,90,74,.1)}
+.opts input{accent-color:var(--acc);margin-top:2px}
+.fb{margin-top:12px;padding:10px 12px;border-radius:9px;background:rgba(255,255,255,.05);font-size:14px}
+.fb.ok{border-left:3px solid var(--ok)}.fb.no{border-left:3px solid var(--red)}
+.num-in{display:flex;gap:8px;align-items:center}.num-in input{width:110px;background:rgba(0,0,0,.3);border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+textarea{width:100%;min-height:120px;background:rgba(0,0,0,.3);border:1px solid var(--line);border-radius:9px;color:var(--ink);padding:10px;font:14px "Instrument Sans";resize:vertical}
+
+#hud{position:absolute;left:294px;right:16px;bottom:16px;display:flex;gap:12px;align-items:stretch;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:10px 12px;z-index:4;backdrop-filter:blur(10px)}
+#clock{flex:none;display:flex;flex-direction:column;justify-content:center;min-width:104px}
+#clock b{font:800 28px/1 "Bricolage Grotesque",sans-serif}
+#clock small{font:600 10.5px "JetBrains Mono",monospace;color:var(--sun);letter-spacing:.08em;margin-top:4px;white-space:nowrap}
+#clock .ctl{display:flex;gap:3px;margin-top:6px}
+#clock .ctl button{border:1px solid var(--line);background:none;border-radius:6px;padding:2px 6px;font:600 10.5px "JetBrains Mono",monospace;cursor:pointer;color:var(--muted)}
+#clock .ctl button.on{background:var(--ink);color:#141414}
+#kpis{display:grid;grid-template-columns:repeat(5,minmax(92px,1fr));gap:8px;flex:1}
+.kpi{background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:10px;padding:6px 9px;min-width:0}
+.kpi small{display:block;font:600 10px "JetBrains Mono",monospace;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kpi b{display:block;font:800 20px "Bricolage Grotesque",sans-serif;margin-top:2px;white-space:nowrap}
+.kpi em{display:block;font-style:normal;font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kpi.g{border-color:rgba(95,211,141,.5)}.kpi.g b{color:var(--ok)}.kpi.y{border-color:rgba(255,203,61,.5)}.kpi.y b{color:var(--sun)}.kpi.o{border-color:rgba(255,154,61,.6)}.kpi.o b{color:var(--org)}.kpi.r{border-color:rgba(255,90,74,.7);background:rgba(255,90,74,.08)}.kpi.r b{color:var(--red)}
+#cap{width:280px;flex:none;font-size:12.5px;line-height:1.4}
+#cap>b{display:block;font:600 10.5px "JetBrains Mono",monospace;letter-spacing:.1em;text-transform:uppercase;color:var(--acc);margin-bottom:3px}
+#cap .act{margin-top:7px;display:flex;gap:6px;flex-wrap:wrap}
+
+#scard{position:absolute;z-index:8;display:none;background:var(--panel2);border:1px solid var(--line2);border-radius:12px;padding:10px 12px;font-size:12.5px;width:210px;box-shadow:0 12px 30px rgba(0,0,0,.5)}
+#scard h5{margin:0 0 4px;font:800 16px "Bricolage Grotesque",sans-serif}
+#scard .row{display:flex;justify-content:space-between;margin:2px 0}#scard .row span{color:var(--muted)}
+
+.modal{position:absolute;inset:0;background:rgba(3,6,8,.66);display:none;place-items:center;z-index:15;padding:16px}
+.modal.open{display:grid}
+.modal .mcard{background:var(--panel2);border:1px solid var(--line);border-radius:16px;max-width:760px;width:100%;max-height:92%;overflow:auto;padding:22px 24px;box-shadow:0 30px 60px rgba(0,0,0,.5)}
+.modal h2{font:800 28px "Bricolage Grotesque",sans-serif;margin:0 0 8px}
+.modal h3{margin:16px 0 6px;font-size:15px}
+.modal p,.modal li{font-size:14.5px;line-height:1.55;color:#dcd8cf}
+.scores{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin:12px 0}
+.score{background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:12px;padding:10px;text-align:center}
+.score small{display:block;font:600 10.5px "JetBrains Mono",monospace;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+.score b{display:block;font:800 30px "Bricolage Grotesque",sans-serif;margin:4px 0}
+.score i{display:block;height:6px;border-radius:3px;background:rgba(255,255,255,.1);overflow:hidden}.score i span{display:block;height:100%}
+.score.main{border-color:var(--acc);background:rgba(43,182,115,.1)}
+.rtable{width:100%;border-collapse:collapse;font-size:13.5px}.rtable td{padding:5px 6px;border-bottom:1px solid var(--line)}.rtable td:last-child{text-align:right;font-family:"JetBrains Mono",monospace}
+.tips li{margin:5px 0}
+.cmp{font-size:12.5px;color:var(--muted)}
+.keys{width:100%;border-collapse:collapse;font-size:13.5px}.keys td{padding:5px 6px;border-bottom:1px solid var(--line)}
+kbd{font:600 12px "JetBrains Mono",monospace;background:rgba(255,255,255,.1);border-radius:5px;padding:2px 6px}
+#loader{position:absolute;inset:0;display:grid;place-items:center;z-index:20;background:var(--bg1);transition:opacity .6s}
+#loader.gone{opacity:0;pointer-events:none}
+#loader div{text-align:center}#loader h3{font:800 26px "Bricolage Grotesque",sans-serif;margin:14px 0 4px}#loader p{color:var(--muted);margin:0}
+.spin{width:44px;height:44px;border-radius:50%;border:3px solid rgba(255,255,255,.12);border-top-color:var(--acc);margin:auto;animation:sp 1s linear infinite}
+@keyframes sp{to{transform:rotate(1turn)}}
+#err{position:absolute;inset:0;display:none;place-items:center;z-index:30;background:var(--bg1);padding:24px;text-align:center}#err.open{display:grid}
+#toast{position:absolute;left:50%;top:84px;transform:translateX(-50%);z-index:9;background:var(--panel2);border:1px solid var(--line2);border-radius:10px;padding:8px 14px;font-size:13px;opacity:0;transition:opacity .3s;pointer-events:none}
+#toast.on{opacity:1}
+body.present #left{display:none}body.present #hud{left:16px}body.present .panel{width:500px}body.present .pb{font-size:18px}
+body.mode-edit .only-run{display:none!important}body.mode-run .only-edit{display:none!important}
+@media (max-width:1150px){#kpis{grid-template-columns:repeat(3,minmax(80px,1fr))}#cap{width:220px}}
+@media (max-width:820px){
+  .title h1{font-size:24px}.title p{display:none}#top{flex-direction:column}.tools{justify-content:flex-start}.btn .t{display:none}
+  #left{top:auto;bottom:16px;height:46%;width:auto;right:16px;display:none;z-index:8}
+  body.showleft #left{display:flex}
+  #hud{left:16px;flex-wrap:wrap;gap:8px}#kpis{grid-template-columns:repeat(3,minmax(0,1fr))}#cap{width:auto;flex:1 1 100%}
+  .panel{left:16px;right:16px;width:auto;top:auto;bottom:16px;max-height:58%}
+  .scores{grid-template-columns:repeat(2,1fr)}
+}
+</style>
+</head>
+<body class="lbl-dots mode-edit">
+<div id="app">
+  <canvas id="c" aria-label="3D-gymzaal"></canvas>
+  <div id="vignette"></div>
+  <div id="markers"></div>
+  <div id="toast"></div>
+
+  <header id="top">
+    <div class="title">
+      <a href="index.html">← Gymlab · lesorganisatie</a>
+      <h1>De <span>Zaal</span></h1>
+      <p>Richt de gymzaal in volgens het 3-vakkensysteem en geef les aan een gesimuleerde klas</p>
+    </div>
+    <div class="tools">
+      <div class="seg" role="group" aria-label="Modus"><button data-mode="edit" class="on">1 · Inrichten</button><button data-mode="run">2 · Lesgeven</button></div>
+      <button class="btn" id="bLeft">Paneel</button>
+      <button class="btn" id="bQuiz">Missies</button>
+      <button class="btn" id="bHelp">Uitleg</button>
+      <button class="btn" id="bSound" title="Geluid (G)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path id="sndWave" d="M17 9l4 6M21 9l-4 6"/></svg><span class="t">Geluid</span></button>
+      <button class="btn" id="bPresent" title="Presenteren"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="12" rx="1.5"/><path d="M12 16v4M8 20h8"/></svg><span class="t">Presenteren</span></button>
+    </div>
+  </header>
+
+  <aside id="left">
+    <div class="ltabs"><button data-lt="tools" class="on only-edit">Toestellen</button><button data-lt="teach" class="only-run">Docent</button><button data-lt="klas">Klas &amp; les</button><button data-lt="check">Check <span id="ckN"></span></button></div>
+    <div class="lbody" id="lt-tools">
+      <h4>Voorbeeldles</h4>
+      <select id="preset"><option value="ssb">Springen · zwaaien · balanceren</option><option value="klim">Klimmen · zwaaien · mikken</option><option value="fout">Fouten-zaal (vind de fouten)</option><option value="leeg">Lege zaal</option></select>
+      <h4>Zet een toestel neer</h4>
+      <div class="tool-grid" id="toolGrid"></div>
+      <p class="hint">Klik een toestel en daarna op de vloer. Sleep om te verplaatsen, <kbd>R</kbd> draait, <kbd>Del</kbd> verwijdert.</p>
+      <div id="selCard"></div>
+    </div>
+    <div class="lbody" id="lt-teach" style="display:none">
+      <h4>Docent</h4>
+      <p class="hint">Sleep de docent (geel hesje) naar een andere plek. De gele kegel is je blikveld.</p>
+      <div class="card">
+        <label class="tg"><input type="checkbox" id="tAuto" checked><span>Kijk automatisch naar de klas</span></label>
+        <div class="row"><label>Kijkrichting</label><output id="oFace">–</output></div><input type="range" id="rFace" min="0" max="359" value="180" disabled>
+        <label class="tg"><input type="checkbox" id="tCone" checked><span>Blikveld tonen</span></label>
+      </div>
+      <h4>Hulpverlenen</h4>
+      <div class="card"><div class="row"><label>Sta bij</label><select id="tHelp"><option value="">niemand (overzicht)</option></select></div>
+        <p class="hint">Bij hoge kast, bok, trampoline en hoge ringen is hulpverlening nodig. Maar terwijl je helpt, kijk je naar dat toestel…</p></div>
+      <h4>Snel neerzetten</h4>
+      <div class="tool-grid"><button class="tool" data-tp="wall"><b>Langs de wand</b><small>midden, rug naar de muur</small></button><button class="tool" data-tp="mid"><b>Midden in de zaal</b><small>tussen de vakken</small></button><button class="tool" data-tp="corner"><b>In een hoek</b><small>bij de kleedkamer</small></button><button class="tool" data-tp="vak2"><b>Bij de vaklijn</b><small>tussen vak 1 en 2</small></button></div>
+    </div>
+    <div class="lbody" id="lt-klas" style="display:none">
+      <h4>Klas</h4>
+      <div class="card">
+        <div class="row"><label>Groep</label><select id="kGroep"><option>3</option><option>4</option><option selected>5</option><option>6</option><option>7</option><option>8</option></select></div>
+        <div class="row"><label>Aantal leerlingen</label><output id="oN">27</output></div><input type="range" id="kN" min="18" max="32" value="27">
+        <div class="row"><label>Drukke leerlingen</label><output id="oDruk">4</output></div><input type="range" id="kDruk" min="0" max="10" value="4">
+        <div class="row"><label>Voorzichtige leerlingen</label><output id="oAng">4</output></div><input type="range" id="kAng" min="0" max="10" value="4">
+        <label class="tg"><input type="checkbox" id="kDcd" checked><span>Leerling met DCD (motorisch zwak)</span></label>
+        <div class="row"><label>Groepjes</label><select id="kIndel"><option value="mix">gemengd</option><option value="niveau">op niveau</option></select></div>
+        <button class="btn" id="kNew" style="margin-top:6px">↻ Nieuwe klas</button>
+      </div>
+      <h4>Lesverloop</h4>
+      <div class="card">
+        <div class="row"><label>Instructie</label><select id="lInstr"><option value="noord">bank onder de ramen</option><option value="zuid">bank tegenover de ramen</option><option value="kring">kring midden</option></select></div>
+        <div class="row"><label>Uitleg duurt</label><select id="lInstrT"><option value="60">1 min (kort)</option><option value="120" selected>2 min</option><option value="210">3,5 min (lang)</option></select></div>
+        <div class="row"><label>Tijd per vak</label><output id="oRonde">6 min</output></div><input type="range" id="lRonde" min="3" max="8" value="6">
+        <div class="row"><label>Doordraaien</label><select id="lRot"><option value="1">1 → 2 → 3</option><option value="-1">1 → 3 → 2</option></select></div>
+      </div>
+    </div>
+    <div class="lbody" id="lt-check" style="display:none">
+      <h4>Veiligheid &amp; organisatie</h4>
+      <div id="issues"></div>
+      <h4>Verwachting per vak</h4>
+      <div id="vakPred"></div>
+    </div>
+  </aside>
+
+  <aside class="panel" id="info"><div class="ph"><div class="num" id="iNum">1</div><div><h2 id="iTitle"></h2><p class="lat" id="iLat"></p></div><button class="x" id="iClose">×</button></div>
+    <div class="tabs" id="iTabs"><button data-tab="0" class="on">Uitleg</button><button data-tab="1">In de praktijk</button><button data-tab="2">Rekenen</button><button data-tab="3">Denkvraag</button></div>
+    <div class="pb" id="iBody"></div><div class="pf"><button id="iPrev">← Vorige</button><span id="iPos"></span><button id="iNext">Volgende →</button></div></aside>
+  <aside class="panel" id="quiz"><div class="ph"><div class="num" style="background:var(--sun)">★</div><div><h2>Missies</h2><p class="lat">7 opdrachten · RTTI</p></div><button class="x" id="qClose">×</button></div>
+    <div class="pb" id="qBody"></div><div class="pf"><span id="qPos"></span><button id="qNext" disabled>Volgende →</button></div></aside>
+
+  <div id="hud">
+    <div id="clock"><b id="clk">00:00</b><small id="clkS">INRICHTEN</small><div class="ctl only-run"><button id="bPlay">⏸</button><button data-sp="5">×5</button><button data-sp="10" class="on">×10</button><button data-sp="20">×20</button></div></div>
+    <div id="kpis">
+      <div class="kpi" id="k1"><small>Bewegingstijd</small><b id="k1v">–</b><em id="k1e"></em></div>
+      <div class="kpi" id="k2"><small>Langste rij</small><b id="k2v">–</b><em id="k2e"></em></div>
+      <div class="kpi" id="k3"><small>In je blikveld</small><b id="k3v">–</b><em id="k3e"></em></div>
+      <div class="kpi" id="k4"><small>Onrust</small><b id="k4v">–</b><em id="k4e"></em></div>
+      <div class="kpi" id="k5"><small>Incidenten</small><b id="k5v">–</b><em id="k5e"></em></div>
+    </div>
+    <div id="cap"><b id="capT"></b><span id="capX"></span><div class="act" id="capA"></div></div>
+  </div>
+  <div id="scard"></div>
+
+  <div class="modal" id="report"><div class="mcard" id="repBody"></div></div>
+  <div class="modal" id="help"><div class="mcard">
+    <h2>Welkom in de zaal</h2>
+    <p>Je richt een gymlokaal (22 × 14 m) in volgens het <b>3-vakkensysteem</b>: drie groepjes werken tegelijk in drie vakken en draaien na een vaste tijd door. Daarna geef je les aan een gesimuleerde klas uit het basisonderwijs.</p>
+    <h3>1 · Inrichten</h3>
+    <ul><li>Kies een voorbeeldles of begin met een lege zaal.</li><li>Zet toestellen neer, draai ze (<kbd>R</kbd>) en kies per toestel de variant en de mat.</li><li>De <b>valzones</b> zijn rood als ze niet goed met een mat zijn bedekt, en groen als het klopt. Oranje is de uitloop, de pijlen tonen de wachtrij en de stippellijn de teruglooproute.</li><li>Het tabblad <b>Check</b> laat zien wat er nog niet veilig of handig is.</li></ul>
+    <h3>2 · Lesgeven</h3>
+    <ul><li>De klas krijgt uitleg, gaat naar de vakken en draait twee keer door.</li><li>Sleep de <b>docent</b> naar een plek met overzicht. De gele kegel is je blikveld. Wat je niet ziet, merk je te laat op.</li><li>Leerlingen die lang moeten wachten worden onrustig. Wie onrustig is en niet gezien wordt, gaat rommelen of klimt ergens op.</li><li>Na de les krijg je een <b>lesrapport</b> op vier punten: bewegen, veiligheid, overzicht en rust.</li></ul>
+    <h3>Sneltoetsen</h3>
+    <table class="keys"><tr><td><kbd>1</kbd> <kbd>2</kbd></td><td>Inrichten · lesgeven</td></tr><tr><td><kbd>R</kbd> · <kbd>Del</kbd></td><td>Toestel draaien · verwijderen</td></tr><tr><td><kbd>Spatie</kbd></td><td>Les pauzeren</td></tr><tr><td><kbd>→</kbd> <kbd>←</kbd></td><td>Volgend / vorig tabje of uitlegpunt</td></tr><tr><td><kbd>G</kbd> · <kbd>L</kbd></td><td>Geluid · labels</td></tr></table>
+    <p style="margin-top:16px"><button class="btn acc" id="helpClose">Aan de slag</button></p>
+    <p class="hint">Dit is een leermodel. Gedrag, risico’s en tijden zijn vereenvoudigd om het effect van keuzes zichtbaar te maken. Het vervangt geen veiligheidsrichtlijnen of de eigen beoordeling van de docent.</p>
+  </div></div>
+  <div id="loader"><div><div class="spin"></div><h3>De zaal wordt klaargezet…</h3><p>Matten uit de berging, kasten op hun plek</p></div></div>
+  <div id="err"><div><h2>Het 3D-beeld werkt niet</h2><p id="errMsg" style="color:var(--muted)">Je browser kon de 3D-weergave niet starten.</p><button class="btn acc" onclick="location.reload()">Opnieuw laden</button></div></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+window.__err=function(m){document.getElementById('errMsg').textContent=m;document.getElementById('err').classList.add('open');document.getElementById('loader').classList.add('gone');};
+window.addEventListener('error',function(){if(!window.THREE)window.__err('De 3D-bibliotheek kon niet geladen worden. Controleer de internetverbinding.');});
+</script>
+<script>
+(function(){
+"use strict";
+if(!window.THREE||!THREE.OrbitControls){window.__err('De 3D-bibliotheek kon niet geladen worden. Controleer de internetverbinding.');return;}
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v)),lerp=(a,b,t)=>a+(b-a)*t,smooth=t=>{t=clamp(t,0,1);return t*t*(3-2*t);};
+const ease=t=>{t=clamp(t,0,1);return t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;};
+const TAU=Math.PI*2,D2R=Math.PI/180,reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;}}
+let R=mulberry32(7);const RV=mulberry32(99);
+const V=(x,y,z)=>new THREE.Vector3(x,y,z);
+const pct=v=>Math.round(v*100)+'%';
+const fmtT=s=>{s=Math.max(0,Math.floor(s));return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');};
+const toast=(m)=>{const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(toast.h);toast.h=setTimeout(()=>t.classList.remove('on'),2200);};
+
+/* ================= renderer ================= */
+const canvas=$('#c');let renderer;
+try{renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true});}catch(e){window.__err('Je browser ondersteunt geen WebGL. Probeer Chrome of Edge.');return;}
+renderer.setClearColor(0,0);renderer.outputEncoding=THREE.sRGBEncoding;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.1;
+renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+const scene=new THREE.Scene();
+const camera=new THREE.PerspectiveCamera(38,1,.1,300);camera.position.set(0,30,14);
+const controls=new THREE.OrbitControls(camera,canvas);controls.enableDamping=true;controls.dampingFactor=.08;controls.minDistance=5;controls.maxDistance=70;controls.maxPolarAngle=1.45;
+const hemi=new THREE.HemisphereLight(0xf2f6ff,0x4a3a28,.75);scene.add(hemi);
+const sun=new THREE.DirectionalLight(0xfff4e0,.9);sun.position.set(-6,22,-16);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);Object.assign(sun.shadow.camera,{left:-16,right:16,top:12,bottom:-12,near:2,far:60});sun.shadow.bias=-.0006;scene.add(sun);
+const fillL=new THREE.DirectionalLight(0xbcd2ff,.35);fillL.position.set(10,12,14);scene.add(fillL);
+
+/* ================= helpers ================= */
+function canvasTex(w,h,draw){const c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');draw(x,w,h);const t=new THREE.CanvasTexture(c);t.encoding=THREE.sRGBEncoding;t.anisotropy=4;return t;}
+function mesh(geo,mat,pos,rot,parent){const m=new THREE.Mesh(geo,mat);if(pos)m.position.set(pos[0],pos[1],pos[2]);if(rot)m.rotation.set(rot[0],rot[1],rot[2]);m.castShadow=true;m.receiveShadow=true;(parent||scene).add(m);return m;}
+const std=(c,o)=>new THREE.MeshStandardMaterial(Object.assign({color:c,roughness:.7},o||{}));
+const box=(w,h,d,mat,x,y,z,p)=>mesh(new THREE.BoxGeometry(w,h,d),mat,[x,y,z],0,p);
+function rectWorld(st,r){if(!r)return null;const pts=[[r[0],r[2]],[r[1],r[2]],[r[0],r[3]],[r[1],r[3]]].map(p=>toWorld(st,p[0],p[1]));return [Math.min(...pts.map(p=>p[0])),Math.max(...pts.map(p=>p[0])),Math.min(...pts.map(p=>p[1])),Math.max(...pts.map(p=>p[1]))];}
+function toWorld(st,lx,lz){const t=st.rot*Math.PI/2,c=Math.cos(t),s=Math.sin(t);return [st.x+lx*c+lz*s,st.z-lx*s+lz*c];}
+const ov=(a,b,m)=>a&&b&&a[0]<b[1]-(m||0)&&a[1]>b[0]+(m||0)&&a[2]<b[3]-(m||0)&&a[3]>b[2]+(m||0);
+const inRect=(r,x,z)=>r&&x>=r[0]&&x<=r[1]&&z>=r[2]&&z<=r[3];
+
+/* ================= the hall ================= */
+const ZX=11,ZZ=7; // half sizes: 22 x 14 m
+const VAKX=[-ZX,-ZX/3,ZX/3,ZX];
+const vakOf=x=>x<VAKX[1]?0:x<VAKX[2]?1:2;
+const floorTex=canvasTex(1100,700,(x,w,h)=>{
+  for(let y=0;y<h;y+=14){let xx=-Math.random()*120;while(xx<w){const L=120+Math.random()*160,v=Math.random();x.fillStyle=`hsl(${34+v*6},${45+v*10}%,${62+v*8}%)`;x.fillRect(xx,y,L,14);x.fillStyle='rgba(90,55,25,.25)';x.fillRect(xx,y,1,14);xx+=L;}x.fillStyle='rgba(90,55,25,.18)';x.fillRect(0,y,w,1);}
+  const s=w/22;x.lineWidth=3;
+  x.strokeStyle='#d8462f';x.strokeRect(1*s,1*s,20*s,12*s);x.beginPath();x.moveTo(11*s,1*s);x.lineTo(11*s,13*s);x.stroke();x.beginPath();x.arc(11*s,7*s,1.8*s,0,TAU);x.stroke();
+  x.strokeStyle='#2f6fd6';x.strokeRect(2.5*s,1.9*s,6.2*s,10.2*s);x.strokeRect(13.3*s,1.9*s,6.2*s,10.2*s);
+  x.strokeStyle='#e7c34a';x.beginPath();x.arc(0,7*s,4*s,-Math.PI/2,Math.PI/2);x.stroke();x.beginPath();x.arc(22*s,7*s,4*s,Math.PI/2,Math.PI*1.5);x.stroke();
+});
+const hall=new THREE.Group();scene.add(hall);
+mesh(new THREE.BoxGeometry(26,1.4,18),std(0x2b2018,{roughness:.6}),[0,-.72,0],0,hall);
+mesh(new THREE.BoxGeometry(26.6,.25,18.6),std(0x150f0b),[0,-1.4,0],0,hall);
+const floor=mesh(new THREE.PlaneGeometry(22,14),std(0xffffff,{map:floorTex,roughness:.45}),[0,.005,0],[-Math.PI/2,0,0],hall);floor.castShadow=false;
+const wallMat=std(0xe9e4d8,{roughness:.9}),wallMat2=std(0xd8d2c4,{roughness:.9}),trim=std(0x3a4a52,{roughness:.6});
+box(22.6,5.6,.3,wallMat,0,2.8,-7.15,hall);   // north wall with windows
+box(.3,5.6,14.6,wallMat2,-11.15,2.8,0,hall);  // west wall (kleedkamers)
+box(22.6,1.0,.3,wallMat,0,.5,7.15,hall);     // south wall (cut away)
+box(.3,1.0,14.6,wallMat2,11.15,.5,0,hall);   // east wall (cut away)
+const winMat=new THREE.MeshStandardMaterial({color:0xcfe6ff,emissive:0x9cc8ff,emissiveIntensity:.55,roughness:.2});
+for(let k=0;k<6;k++){const x=-8.75+k*3.5;box(2.8,1.6,.05,winMat,x,4.2,-6.98,hall);box(2.8,.08,.12,trim,x,3.38,-6.95,hall);}
+const shaftMat=new THREE.MeshBasicMaterial({color:0xfff3d6,transparent:true,opacity:.07,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide});
+for(let k=0;k<6;k++){const g=new THREE.Mesh(new THREE.PlaneGeometry(2.8,7.5),shaftMat);g.position.set(-8.75+k*3.5+.6,2.4,-4.2);g.rotation.set(-1.05,0,0);hall.add(g);}
+// doors
+const doorMat=std(0x6a7f8a);box(.08,2.2,1.4,doorMat,-10.98,1.1,-3.5,hall);box(.08,2.2,1.4,doorMat,-10.98,1.1,3.5,hall);
+const lbl=(t,w,h,bg,fg)=>canvasTex(w,h,(x)=>{x.fillStyle=bg;x.fillRect(0,0,w,h);x.fillStyle=fg;x.font=`700 ${h*.5}px "Instrument Sans",Arial`;x.textAlign='center';x.textBaseline='middle';x.fillText(t,w/2,h/2+2);});
+[['Kleedkamer jongens',-3.5],['Kleedkamer meisjes',3.5]].forEach(([t,z])=>{const m=mesh(new THREE.PlaneGeometry(1.6,.3),new THREE.MeshBasicMaterial({map:lbl(t,512,96,'#2b3a42','#ffffff')}),[-10.97,2.5,z],[0,Math.PI/2,0],hall);m.castShadow=false;});
+box(.2,.8,4,std(0x6a7f8a),11.05,.4,0,hall); // berging opening (low wall)
+const bergT=mesh(new THREE.PlaneGeometry(2,.4),new THREE.MeshBasicMaterial({map:lbl('BERGING',256,52,'#2b3a42','#ffcb3d')}),[11.32,1.05,0],[0,Math.PI/2,0],hall);
+// fixed wall bars along south wall
+const wbMat=std(0xc89a5c,{roughness:.6});const WB_X0=-10,WB_X1=-2;
+const wallbars=new THREE.Group();hall.add(wallbars);
+for(let x=WB_X0;x<=WB_X1+.01;x+=1){box(.08,2.7,.08,wbMat,x,1.35,6.85,wallbars);}
+for(let y=.25;y<2.7;y+=.24){const m=new THREE.Mesh(new THREE.CylinderGeometry(.025,.025,8,6),wbMat);m.rotation.z=Math.PI/2;m.position.set(-6,y,6.82);m.castShadow=true;wallbars.add(m);}
+// benches along walls (decor)
+// ceiling rails (visual)
+for(let x=-6;x<=6;x+=6){const r=mesh(new THREE.BoxGeometry(.15,.15,14),trim,[x,5.5,0],0,hall);r.castShadow=false;}
+
+/* ================= apparatus types ================= */
+const M={wood:std(0xc89a5c,{roughness:.55}),woodD:std(0x8a5f36),leather:std(0xe8d7b4,{roughness:.8}),brown:std(0x6b3f22,{roughness:.6}),
+  matDun:std(0x2f5fb8,{roughness:.9}),matDik:std(0x3c4a63,{roughness:.95}),metal:std(0x9aa3ad,{metalness:.7,roughness:.35}),black:std(0x1b1b1f),rope:std(0xd9c79d,{roughness:.9}),
+  ring:std(0x7a4b24,{roughness:.5}),red:std(0xd8462f),blue:std(0x2f6fd6),yel:std(0xe7c34a)};
+const TYPES={
+ kast:{name:'Springkast',act:'springen',icon:'kast',lanes:[0],cap:1,qz:-5.3,exitSide:1.7,endZ:1.9,
+  variants:{laag:{label:'laag (3 delen, 80 cm)',h:.8,risk:2,hulp:false,dur:4.2,mat:'dun'},hoog:{label:'hoog (4 delen, 110 cm)',h:1.1,risk:3,hulp:true,dur:4.4,mat:'dik'}},
+  val:[-.95,.95,.3,2.6],uit:[-1,1,2.6,4.0],run:[-.6,.6,-5.0,-1.5],obj:[-.8,.8,-1.65,.32],release:.92,
+  path(t,v,mh){const h=v.h;if(t<.5)return [0,0,lerp(-4.9,-1.5,t/.5)];if(t<.62){const u=(t-.5)/.12;return [0,h*u+.25*Math.sin(Math.PI*u),lerp(-1.5,-.15,u)];}
+    if(t<.84){const u=(t-.62)/.22;return [0,h*(1-u)+mh*u+.55*Math.sin(Math.PI*u),lerp(-.15,1.5,u)];}const u=(t-.84)/.16;return [0,mh,lerp(1.5,1.9,u)];}},
+ bok:{name:'Bok',act:'springen',lanes:[0],cap:1,qz:-4.7,exitSide:1.6,endZ:1.7,
+  variants:{laag:{label:'laag (90 cm)',h:.9,risk:2,hulp:false,dur:3.8,mat:'dun'},hoog:{label:'hoog (110 cm)',h:1.1,risk:3,hulp:true,dur:3.9,mat:'dik'}},
+  val:[-.95,.95,.2,2.4],uit:[-1,1,2.4,3.8],run:[-.6,.6,-4.4,-1.3],obj:[-.6,.6,-1.55,.3],release:.9,
+  path(t,v,mh){if(t<.5)return [0,0,lerp(-4.3,-1.25,t/.5)];if(t<.82){const u=(t-.5)/.32;return [0,lerp(.12,mh,u)+(v.h+.15)*Math.sin(Math.PI*u),lerp(-1.25,1.3,u)];}const u=(t-.82)/.18;return [0,mh,lerp(1.3,1.7,u)];}},
+ tramp:{name:'Minitrampoline',act:'springen',lanes:[0],cap:1,qz:-4.7,exitSide:1.7,endZ:2.0,
+  variants:{std:{label:'met dikke mat',risk:4,hulp:true,dur:3.6,mat:'dik'}},
+  val:[-.95,.95,.5,3.1],uit:[-1,1,3.1,4.4],run:[-.6,.6,-4.4,-.8],obj:[-.65,.65,-.75,.55],release:.92,
+  path(t,v,mh){if(t<.5)return [0,0,lerp(-4.3,-.55,t/.5)];if(t<.88){const u=(t-.5)/.38;return [0,lerp(.35,mh,u)+1.3*Math.sin(Math.PI*u),lerp(-.1,1.7,u)];}const u=(t-.88)/.12;return [0,mh,lerp(1.7,2.0,u)];}},
+ bank:{name:'Zweedse bank',act:'balanceren',lanes:[0],cap:2,qz:-2.8,exitSide:1.1,endZ:2.5,
+  variants:{breed:{label:'brede kant',risk:1,hulp:false,dur:7.5,mat:null,y:.32},smal:{label:'smalle kant (omgedraaid)',risk:2,hulp:false,dur:9,mat:null,y:.4}},
+  val:null,uit:[-.6,.6,2.05,3.0],run:null,obj:[-.25,.25,-2.0,2.0],release:.42,
+  path(t,v){if(t<.08)return [0,lerp(0,v.y,t/.08),lerp(-2.6,-2.0,t/.08)];if(t<.92){const u=(t-.08)/.84;return [.04*Math.sin(u*25),v.y,lerp(-2.0,2.0,u)];}const u=(t-.92)/.08;return [0,lerp(v.y,0,u),lerp(2.0,2.5,u)];}},
+ balk:{name:'Evenwichtsbalk',act:'balanceren',lanes:[0],cap:2,qz:-2.7,exitSide:1.2,endZ:2.5,
+  variants:{std:{label:'laag (50 cm)',risk:2,hulp:false,dur:9.5,mat:null,y:.52}},
+  val:[-.7,.7,-2,2],uit:[-.6,.6,2.05,3.0],run:null,obj:[-.25,.25,-2.0,2.0],release:.5,optMat:true,
+  path(t,v){if(t<.08)return [0,lerp(0,v.y,t/.08),lerp(-2.5,-2.0,t/.08)];if(t<.92){const u=(t-.08)/.84;return [.06*Math.sin(u*31),v.y,lerp(-2.0,2.0,u)];}const u=(t-.92)/.08;return [0,lerp(v.y,0,u),lerp(2.0,2.5,u)];}},
+ ringen:{name:'Ringen',act:'zwaaien',lanes:[0],cap:1,qz:-3.1,exitSide:1.3,endZ:-1.6,
+  variants:{laag:{label:'laag (zittend zwaaien)',risk:2,hulp:false,dur:7,mat:'dun',hr:1.25},hoog:{label:'hoog (hangend zwaaien)',risk:3,hulp:true,dur:7,mat:'dun',hr:1.75}},
+  val:[-.85,.85,-2.1,2.1],uit:null,run:null,obj:[-.35,.35,-.2,.2],release:.95,
+  path(t,v,mh){if(t<.2)return [0,0,lerp(-2.7,-1.3,t/.2)];if(t<.86){const u=(t-.2)/.66;const z=-1.3*Math.cos(u*TAU*1.5);return [0,mh+.15+.32*Math.abs(z)/1.3+(v.hr>1.5?.35:0),z];}const u=(t-.86)/.14;return [0,0,lerp(1.3,-1.6,u)];}},
+ touwen:{name:'Klimtouwen',act:'klimmen',lanes:[-.6,.6],cap:1,qz:-2.4,exitSide:1.45,endZ:-.9,
+  variants:{half:{label:'tot halverwege (1,5 m)',risk:2,hulp:false,dur:10,mat:'dun',H:1.5},hoog:{label:'helemaal (3 m)',risk:3,hulp:false,dur:13,mat:'dik',H:3}},
+  val:[-1.3,1.3,-1.1,1.1],uit:null,run:null,obj:[-.8,.8,-.12,.12],release:1,
+  path(t,v){if(t<.12)return [0,0,lerp(-2.0,-.22,t/.12)];if(t<.9){const u=(t-.12)/.78;return [0,v.H*Math.sin(Math.PI*u),-.22];}const u=(t-.9)/.1;return [0,0,lerp(-.22,-.9,u)];}},
+ wandrek:{name:'Wandrek',act:'klimmen',lanes:[-1,0,1],cap:1,qz:-.1,exitSide:0,endZ:.6,wall:true,
+  variants:{std:{label:'klimmen en afdalen',risk:2,hulp:false,dur:11,mat:'dun',H:1.9}},
+  val:[-1.6,1.6,.9,2.25],uit:null,run:null,obj:[-1.6,1.6,2.0,2.25],release:1,
+  path(t,v){if(t<.14)return [0,0,lerp(.2,1.85,t/.14)];if(t<.88){const u=(t-.14)/.74;return [0,v.H*Math.sin(Math.PI*u),1.9];}const u=(t-.88)/.12;return [0,0,lerp(1.85,.6,u)];}},
+ mikken:{name:'Mikken',act:'mikken',lanes:[-1.1,0,1.1],cap:1,qz:-2.4,exitSide:0,endZ:-2.2,
+  variants:{std:{label:'ballen in de hoepel',risk:0,hulp:false,dur:4.5,mat:null}},
+  val:null,uit:null,run:null,obj:[-1.7,1.7,1.9,2.5],release:.75,
+  path(t){if(t<.3)return [0,0,lerp(-2.2,-1.3,t/.3)];if(t<.7)return [0,.05*Math.sin((t-.3)/.4*Math.PI),-1.3];return [0,0,lerp(-1.3,-2.2,(t-.7)/.3)];}},
+};
+const TOOLS=['kast','bok','tramp','bank','balk','ringen','touwen','wandrek','mikken'];
+const ACT_LABEL={springen:'springen',balanceren:'balanceren',zwaaien:'zwaaien',klimmen:'klimmen',mikken:'mikken'};
+
+/* ================= stations ================= */
+let stations=[],nextId=1,selected=null;
+const stG=new THREE.Group();scene.add(stG);
+function defVariant(type){return Object.keys(TYPES[type].variants)[0];}
+function addStation(type,x,z,rot,variant,mat){const T=TYPES[type];const v=variant||defVariant(type);const st={id:nextId++,type,x,z,rot:rot||0,variant:v,mat:mat!==undefined?mat:(T.variants[v].mat||'geen'),lanes:[]};
+  if(T.wall){st.rot=0;}buildStationMesh(st);stations.push(st);clampStation(st);return st;}
+function clampStation(st){const T=TYPES[st.type];if(T.wall){st.rot=0;st.z=ZZ-.05-2.25;st.x=clamp(st.x,WB_X0+1.6,WB_X1-1.6);}else{st.x=clamp(st.x,-ZX+.4,ZX-.4);st.z=clamp(st.z,-ZZ+.4,ZZ-.4);}st.g.position.set(st.x,0,st.z);st.g.rotation.y=st.rot*Math.PI/2;}
+function vOf(st){return TYPES[st.type].variants[st.variant];}
+function matH(st){return st.mat==='dik'?.3:st.mat==='dun'?.05:0;}
+function buildStationMesh(st){if(st.g){stG.remove(st.g);}const g=new THREE.Group();st.g=g;stG.add(g);const T=TYPES[st.type],v=vOf(st);
+  const P=(geo,mat,p,r)=>mesh(geo,mat,p,r,g);
+  // mat
+  const mr=T.val&&(st.mat!=='geen');if(mr){const r=T.val;const w=r[1]-r[0]+.1,d=r[3]-r[2]+.1,h=st.mat==='dik'?.3:.05;P(new THREE.BoxGeometry(w,h,d),st.mat==='dik'?M.matDik:M.matDun,[(r[0]+r[1])/2,h/2,(r[2]+r[3])/2]);}
+  if(st.type==='kast'){const n=v.h>1?4:3;for(let k=0;k<n;k++){const y=.08+k*.25;P(new THREE.BoxGeometry(1.5-k*.04,.24,.6-k*.02),k%2?M.woodD:M.wood,[0,y+.12,0]);}P(new THREE.BoxGeometry(1.42,.1,.56),M.leather,[0,v.h+.0,0]);
+    P(new THREE.BoxGeometry(.6,.12,.9),M.wood,[0,.14,-1.2],[-.18,0,0]);}
+  if(st.type==='bok'){P(new THREE.BoxGeometry(.6,.35,1.1),M.leather,[0,v.h-.17,-.6],0);[[-.22,-1],[.22,-1],[-.22,-.2],[.22,-.2]].forEach(p=>P(new THREE.CylinderGeometry(.04,.05,v.h-.3,8),M.metal,[p[0],(v.h-.3)/2,p[1]]));P(new THREE.BoxGeometry(.6,.12,.9),M.wood,[0,.14,-1.9+.5],[-.18,0,0]);}
+  if(st.type==='tramp'){const tg=new THREE.Group();tg.position.set(0,.3,0);tg.rotation.x=-.25;g.add(tg);mesh(new THREE.TorusGeometry(.55,.05,8,24),M.metal,[0,0,0],[Math.PI/2,0,0],tg);mesh(new THREE.CircleGeometry(.5,24),M.black,[0,.01,0],[-Math.PI/2,0,0],tg);
+    [[-.4,-.4],[.4,-.4],[-.4,.4],[.4,.4]].forEach(p=>P(new THREE.CylinderGeometry(.03,.03,.38,6),M.metal,[p[0],.17,p[1]]));}
+  if(st.type==='bank'){if(st.variant==='breed'){P(new THREE.BoxGeometry(.3,.05,4),M.wood,[0,.3,0]);P(new THREE.BoxGeometry(.1,.08,3.8),M.woodD,[0,.2,0]);[-1.8,0,1.8].forEach(z=>P(new THREE.BoxGeometry(.4,.26,.08),M.woodD,[0,.13,z]));}
+    else{P(new THREE.BoxGeometry(.3,.05,4),M.wood,[0,.06,0]);P(new THREE.BoxGeometry(.1,.08,3.8),M.woodD,[0,.36,0]);[-1.8,0,1.8].forEach(z=>P(new THREE.BoxGeometry(.4,.26,.08),M.woodD,[0,.2,z]));}}
+  if(st.type==='balk'){P(new THREE.BoxGeometry(.1,.1,4),M.wood,[0,.5,0]);[-1.6,1.6].forEach(z=>{P(new THREE.CylinderGeometry(.04,.04,.45,8),M.metal,[0,.25,z]);P(new THREE.BoxGeometry(.6,.05,.3),M.metal,[0,.03,z]);});}
+  if(st.type==='ringen'){[-.25,.25].forEach(x=>{P(new THREE.CylinderGeometry(.012,.012,5.5-v.hr,6),M.rope,[x,v.hr+(5.5-v.hr)/2,0]);P(new THREE.TorusGeometry(.1,.018,8,20),M.ring,[x,v.hr-.1,0]);});}
+  if(st.type==='touwen'){T.lanes.forEach(x=>{P(new THREE.CylinderGeometry(.025,.03,5.5,8),M.rope,[x,2.75,0]);for(let y=.6;y<v.H+.1;y+=.5)P(new THREE.SphereGeometry(.05,8,6),M.rope,[x,y,0]);});}
+  if(st.type==='wandrek'){/* fixed wall bars are part of the hall */}
+  if(st.type==='mikken'){[-1.1,0,1.1].forEach((x,k)=>{P(new THREE.TorusGeometry(.32,.025,8,24),[M.red,M.blue,M.yel][k],[x,.32,2.2],[0,0,0]);});const bin=P(new THREE.BoxGeometry(.6,.3,.45),M.woodD,[1.9,.15,-2.5]);
+    for(let k=0;k<10;k++)P(new THREE.SphereGeometry(.07,8,6),[M.red,M.blue,M.yel][k%3],[1.7+(k%4)*.13,.33,-2.6+Math.floor(k/4)*.13]);}
+  // invisible pick box
+  const o=T.obj;const pb=new THREE.Mesh(new THREE.BoxGeometry(Math.max(o[1]-o[0],.8)+.4,1.2,Math.max(o[3]-o[2],.8)+.4),new THREE.MeshBasicMaterial({visible:false}));pb.position.set((o[0]+o[1])/2,.6,(o[2]+o[3])/2);pb.userData.st=st;g.add(pb);st.pick=pb;
+  g.position.set(st.x,0,st.z);g.rotation.y=st.rot*Math.PI/2;}
+function removeStation(st){stG.remove(st.g);stations=stations.filter(s=>s!==st);if(selected===st)selected=null;if(teacher.help===st.id)teacher.help=null;layoutChanged();}
+
+/* ================= overlays ================= */
+const ovG=new THREE.Group();scene.add(ovG);
+const ovMat={valOk:new THREE.MeshBasicMaterial({color:0x3ccf6e,transparent:true,opacity:.28,depthWrite:false}),valBad:new THREE.MeshBasicMaterial({color:0xff3b30,transparent:true,opacity:.42,depthWrite:false}),
+  uit:new THREE.MeshBasicMaterial({color:0xff9a3d,transparent:true,opacity:.22,depthWrite:false}),run:new THREE.MeshBasicMaterial({color:0x4c8dff,transparent:true,opacity:.14,depthWrite:false}),
+  sel:new THREE.LineBasicMaterial({color:0xffcb3d}),vak:new THREE.LineDashedMaterial({color:0xffffff,dashSize:.5,gapSize:.35,transparent:true,opacity:.75}),route:new THREE.LineDashedMaterial({color:0xffffff,dashSize:.18,gapSize:.18,transparent:true,opacity:.55}),
+  arrow:new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.7,depthWrite:false})};
+function rectPlane(r,mat,y){const m=new THREE.Mesh(new THREE.PlaneGeometry(r[1]-r[0],r[3]-r[2]),mat);m.rotation.x=-Math.PI/2;m.position.set((r[0]+r[1])/2,y,(r[2]+r[3])/2);m.renderOrder=3;ovG.add(m);return m;}
+function line(pts,mat,y){const g=new THREE.BufferGeometry().setFromPoints(pts.map(p=>V(p[0],y,p[1])));const l=new THREE.Line(g,mat);l.computeLineDistances();ovG.add(l);return l;}
+let showOverlay=true;
+function buildOverlays(){ovG.clear();
+  for(let k=1;k<3;k++)line([[VAKX[k],-ZZ],[VAKX[k],ZZ]],ovMat.vak,.03);
+  if(!showOverlay)return;
+  stations.forEach(st=>{const T=TYPES[st.type];const W=st.W;
+    if(W.val)rectPlane(W.val,st.matOk?ovMat.valOk:ovMat.valBad,.36);
+    if(W.uit)rectPlane(W.uit,ovMat.uit,.03);if(W.run)rectPlane(W.run,ovMat.run,.03);
+    T.lanes.forEach(lx=>{const a=toWorld(st,lx,T.qz-2.6),b=toWorld(st,lx,T.qz);line([a,b],ovMat.route,.04);
+      const tip=new THREE.Mesh(new THREE.ConeGeometry(.16,.4,3),ovMat.arrow);tip.rotation.set(-Math.PI/2,0,0);const dir=Math.atan2(b[0]-a[0],b[1]-a[1]);tip.rotation.z=-dir+Math.PI;tip.position.set(b[0],.05,b[1]);
+      const g=new THREE.Group();g.position.set(b[0],.05,b[1]);g.rotation.y=dir;const c=new THREE.Mesh(new THREE.ConeGeometry(.16,.4,8),ovMat.arrow);c.rotation.x=Math.PI/2;g.add(c);ovG.add(g);
+      if(T.exitSide){const s=T.exitSide*(lx<0?-1:1)||T.exitSide;const pts=[toWorld(st,lx,T.endZ),toWorld(st,lx+s,T.endZ),toWorld(st,lx+s,T.qz-2.4),toWorld(st,lx,T.qz-2.6)];line(pts,ovMat.route,.04);}});
+    if(st===selected){const o=rectWorld(st,[T.obj[0]-.25,T.obj[1]+.25,Math.min(T.obj[2],T.qz)-.25,Math.max(T.obj[3],(T.val||T.obj)[3])+.25]);line([[o[0],o[2]],[o[1],o[2]],[o[1],o[3]],[o[0],o[3]],[o[0],o[2]]],ovMat.sel,.06);}
+  });}
+
+/* ================= checks ================= */
+let issues=[];
+const INNER=[-ZX,ZX,-ZZ,ZZ];
+function inside(r,m){return r[0]>=INNER[0]+m&&r[1]<=INNER[1]-m&&r[2]>=INNER[2]+m&&r[3]<=INNER[3]-m;}
+function computeWorld(){stations.forEach(st=>{const T=TYPES[st.type];const W={};W.obj=rectWorld(st,T.obj);W.val=rectWorld(st,T.val);W.uit=rectWorld(st,T.uit);W.run=rectWorld(st,T.run);
+  const ql=T.lanes;W.queue=rectWorld(st,[Math.min(...ql)-.35,Math.max(...ql)+.35,T.qz-1.9,T.qz+.1]);
+  W.route=T.exitSide?rectWorld(st,[Math.min(...ql)-Math.abs(T.exitSide)-.3,Math.max(...ql)+Math.abs(T.exitSide)+.3,T.qz-2.2,T.endZ]):null;
+  W.side=T.exitSide?[rectWorld(st,[Math.max(...ql)+T.exitSide-.3,Math.max(...ql)+T.exitSide+.3,T.qz-2.2,T.endZ])]:[];
+  st.W=W;const v=vOf(st);st.vak=vakOf(st.x);
+  st.matOk=!T.val||(!v.mat&&!T.optMat)||(v.mat==='dik'?st.mat==='dik':v.mat==='dun'?st.mat!=='geen':true);if(T.optMat&&!v.mat)st.matOk=true;});}
+function checkLayout(){computeWorld();issues=[];const add=(sev,st,txt,why)=>issues.push({sev,st,txt,why});
+  stations.forEach(a=>{const T=TYPES[a.type],v=vOf(a),W=a.W;const nm=`${T.name} (vak ${a.vak+1})`;
+    if(T.val&&v.mat){if(a.mat==='geen')add('crit',a,`${nm}: geen mat in de valzone`,'Bij een val of landing komt de leerling op de harde vloer.');
+      else if(v.mat==='dik'&&a.mat==='dun')add('crit',a,`${nm}: te dunne mat`,'Bij deze hoogte of de trampoline hoort een dikke valmat.');}
+    if(W.val&&!inside(W.val,.2))add('crit',a,`${nm}: valzone raakt de muur`,'Er moet rondom de landing ruimte zijn tot de muur.');
+    if(W.uit&&!inside(W.uit,0))add('crit',a,`${nm}: geen uitloop, landing richting de muur`,'Na de landing loopt de leerling door. Draai het toestel of zet het verder van de muur.');
+    if(W.run&&!inside(W.run,0))add('crit',a,`${nm}: aanloop past niet in de zaal`,'De aanloop loopt door de muur heen. Draai of verplaats het toestel.');
+    if(W.queue&&!inside(W.queue,-.4))add('warn',a,`${nm}: wachtrij staat tegen de muur`,'De rij heeft geen ruimte. Leerlingen gaan dan kriskras staan.');
+    const ox=W.obj;const v0=vakOf(ox[0]+.05),v1=vakOf(ox[1]-.05);const sp=[W.obj,W.val,W.run].filter(Boolean);const minx=Math.min(...sp.map(r=>r[0])),maxx=Math.max(...sp.map(r=>r[1]));
+    if(vakOf(minx+.6)!==vakOf(maxx-.6))add('warn',a,`${nm}: staat over de vaklijn`,'Een toestel hoort in één vak. Anders lopen groepjes door elkaar.');
+    stations.forEach(b=>{if(a===b)return;const WB=b.W,TB=TYPES[b.type];
+      if(a.id<b.id&&ov(W.obj,WB.obj,.05))add('crit',a,`${T.name} en ${TB.name} overlappen`,'Twee toestellen op dezelfde plek.');
+      [['val','valzone'],['uit','uitloop'],['run','aanloop']].forEach(([k,lab])=>{if(W[k]&&(ov(W[k],WB.obj,.05)||ov(W[k],WB.queue,.05)))add('crit',a,`${TB.name} staat in de ${lab} van ${nm}`,'Wie landt of aanloopt, kan iemand raken.');});
+      if(W.side)W.side.forEach(r=>{if(ov(r,WB.val,.05)||ov(r,WB.run,.05)||ov(r,WB.uit,.05))add('warn',a,`Teruglooproute bij ${T.name} loopt door de ${WB.val&&ov(r,WB.val,.05)?'landing':'aanloop'} van ${TB.name}`,'Leerlingen lopen terug door een plek waar iemand anders springt of landt.');});
+    });
+  });
+  // per vak
+  const groupSize=Math.round(klas.length/3);
+  const hulpVakken=new Set();
+  for(let k=0;k<3;k++){const ss=stations.filter(s=>s.vak===k);if(!ss.length){add('crit',null,`Vak ${k+1} is leeg`,'Een groepje heeft niets te doen: veel wachten en onrust.');continue;}
+    const lanes=ss.reduce((a,s)=>a+TYPES[s.type].lanes.length*TYPES[s.type].cap,0);if(groupSize/lanes>4.5)add('warn',null,`Vak ${k+1}: maar ${lanes} plek${lanes>1?'ken':''} voor ${groupSize} leerlingen`,'Lange rijen: zet een tweede uitvoeringsmogelijkheid neer.');
+    if(ss.some(s=>vOf(s).hulp))hulpVakken.add(k);}
+  if(hulpVakken.size>1)add('warn',null,`${hulpVakken.size} vakken hebben hulpverlening nodig`,'Je kunt maar op één plek tegelijk helpen. Maak de andere vakken zelfstandig.');
+  issues.sort((a,b)=>(a.sev==='crit'?0:1)-(b.sev==='crit'?0:1));
+  renderIssues();}
+function renderIssues(){const crit=issues.filter(i=>i.sev==='crit').length,warn=issues.length-crit;$('#ckN').textContent=issues.length?`(${issues.length})`:'✓';
+  $('#issues').innerHTML=issues.length?issues.map((i,k)=>`<div class="issue ${i.sev}" data-k="${k}"><b></b><div><div>${i.txt}</div><div class="hint">${i.why}</div></div></div>`).join(''):'<div class="issue ok"><b></b><div>Geen problemen gevonden. Probeer het in de les!</div></div>';
+  $$('#issues .issue[data-k]').forEach(el=>el.addEventListener('click',()=>{const i=issues[+el.dataset.k];if(i.st){select(i.st);flyTo([i.st.x+6,14,i.st.z+9],[i.st.x,0,i.st.z]);}}));
+  // vak predictions
+  const gs=Math.round(klas.length/3);
+  $('#vakPred').innerHTML=[0,1,2].map(k=>{const ss=stations.filter(s=>s.vak===k);const lanes=ss.reduce((a,s)=>a+TYPES[s.type].lanes.length*TYPES[s.type].cap,0);
+    const cyc=ss.length?ss.reduce((a,s)=>a+vOf(s).dur,0)/ss.length+5:0;const turns=lanes?Math.round(rondeSec()/ Math.max(cyc,(gs/lanes)*cyc/ Math.max(1,TYPES[ss[0].type].cap) )):0;
+    const acts=[...new Set(ss.map(s=>TYPES[s.type].act))].join(', ')||'leeg';
+    return `<div class="card"><div class="row"><b>Vak ${k+1}</b><span class="hint">${acts}</span></div><div class="vakrow"><span>leerlingen</span><b>${gs}</b><span>plekken tegelijk</span><b>${lanes}</b><span>wachtend per plek</span><b>${lanes?(Math.max(0,gs/lanes-1)).toFixed(1).replace('.',','):'–'}</b><span>hulpverlening</span><b>${ss.some(s=>vOf(s).hulp)?'nodig':'nee'}</b></div></div>`;}).join('');
+  if(mode==='edit')updateEditHud(crit,warn);}
+function layoutChanged(){checkLayout();buildOverlays();refreshHelpSelect();renderSelCard();}
+
+/* ================= class ================= */
+const NAMES=['Noah','Emma','Liam','Julia','Lucas','Mila','Sem','Tess','Finn','Sophie','Daan','Zoë','Levi','Sara','Luuk','Nora','Milan','Evi','Bram','Lotte','Jesse','Fenna','Mees','Saar','Thijs','Yara','Adam','Noor','Ravi','Ilse','Mohammed','Fatima','Jayden','Lieke','Sven','Amira','Ties','Roos'];
+const TYPE_INFO={druk:{label:'Druk',rate:1/48,col:'#ff8a5c'},angstig:{label:'Voorzichtig',rate:1/240,col:'#a9b8ff'},dromer:{label:'Dromer',rate:1/200,col:'#c7b7ff'},uitblinker:{label:'Uitblinker',rate:1/95,col:'#ffd166'},gemiddeld:{label:'Gemiddeld',rate:1/150,col:'#cfd8dc'},dcd:{label:'Motorisch zwak (DCD)',rate:1/170,col:'#8fe3c4'}};
+const KC={groep:5,N:27,druk:4,ang:4,dcd:true,indel:'mix',instr:'noord',instrT:120,ronde:6,rot:1};
+let klas=[];let classSeed=1;
+const rondeSec=()=>KC.ronde*60;
+const GROUPS=[{name:'Rood',col:0xe5483b,css:'#e5483b'},{name:'Blauw',col:0x2f6fd6,css:'#4c8dff'},{name:'Geel',col:0xf2c12e,css:'#f2c12e'}];
+function makeClass(){const r=mulberry32(classSeed*131+KC.N*7+KC.groep);const names=NAMES.slice().sort(()=>r()-.5);klas=[];
+  const types=[];for(let i=0;i<KC.N;i++)types.push('gemiddeld');let k=0;const put=(t,n)=>{for(let j=0;j<n&&k<KC.N;j++,k++)types[k]=t;};
+  put('druk',KC.druk);put('angstig',KC.ang);if(KC.dcd)put('dcd',1);put('uitblinker',Math.round(KC.N*.12));put('dromer',Math.round(KC.N*.1));types.sort(()=>r()-.5);
+  const baseLen=1.17+(KC.groep-3)*.065;
+  for(let i=0;i<KC.N;i++){const t=types[i];let skill=t==='uitblinker'?3:t==='dcd'?1:t==='angstig'?(r()<.6?1:2):r()<.25?1:r()<.75?2:3;klas.push({id:i,name:names[i%names.length],type:t,skill,len:baseLen*(.92+r()*.16),group:0});}
+  if(KC.indel==='niveau'){const s=klas.slice().sort((a,b)=>b.skill-a.skill||(r()-.5));s.forEach((p,i)=>p.group=Math.min(2,Math.floor(i/(KC.N/3))));}
+  else{const s=klas.slice().sort(()=>r()-.5);s.forEach((p,i)=>p.group=i%3);}
+  buildKids();}
+
+/* ================= kids rendering ================= */
+const kidG=new THREE.Group();scene.add(kidG);
+const SKIN=[0xf1c9a5,0xd9a27a,0xb07a52,0x7a4e2e,0xe8b48a];const HAIR=[0x2b1d14,0x6b4423,0xd9b26a,0x1a1a1a,0x8a3b1d];
+const kidGeo={body:new THREE.CapsuleGeometry(.15,.42,3,8),head:new THREE.SphereGeometry(.12,12,10),vest:new THREE.CylinderGeometry(.17,.17,.32,10),leg:new THREE.CapsuleGeometry(.055,.34,3,6)};
+let kids=[];
+function buildKids(){kidG.clear();kids=klas.map((p,i)=>{const g=new THREE.Group();const s=p.len/1.35;g.scale.setScalar(s);
+  const sk=std(SKIN[i%SKIN.length]);const shirt=std([0xf2efe6,0x2a2a2e,0x6a6ff0,0x3ccf6e,0xe84393,0xff8a3c][i%6]);
+  const body=mesh(kidGeo.body,shirt,[0,.72,0],0,g);const vest=mesh(kidGeo.vest,std(GROUPS[p.group].col,{roughness:.6}),[0,.82,0],0,g);
+  const head=mesh(kidGeo.head,sk,[0,1.2,0],0,g);mesh(new THREE.SphereGeometry(.125,12,8,0,TAU,0,Math.PI*.5),std(HAIR[(i*3)%HAIR.length]),[0,1.23,-.01],[-.2,0,0],g);
+  const l1=mesh(kidGeo.leg,std(0x1f2a44),[-.07,.24,0],0,g),l2=mesh(kidGeo.leg,std(0x1f2a44),[.07,.24,0],0,g);
+  const ring=new THREE.Mesh(new THREE.RingGeometry(.22,.28,20),new THREE.MeshBasicMaterial({color:0xffcb3d,transparent:true,opacity:0,side:THREE.DoubleSide,depthWrite:false}));ring.rotation.x=-Math.PI/2;ring.position.y=.02;g.add(ring);
+  const pick=new THREE.Mesh(new THREE.CylinderGeometry(.3,.3,1.4,8),new THREE.MeshBasicMaterial({visible:false}));pick.position.y=.7;pick.userData.kid=i;g.add(pick);
+  kidG.add(g);return {g,body,vest,head,l1,l2,ring,pick};});}
+
+/* ================= teacher ================= */
+const teacher={x:0,z:6.2,homeX:0,homeZ:6.2,face:Math.PI,auto:true,help:null,manualFace:Math.PI};
+const tG=new THREE.Group();scene.add(tG);
+mesh(new THREE.CapsuleGeometry(.2,.75,3,10),std(0x1f2a44),[0,1.0,0],0,tG);mesh(new THREE.CylinderGeometry(.23,.23,.45,12),std(0xffd23c,{emissive:0x332200}),[0,1.15,0],0,tG);
+mesh(new THREE.SphereGeometry(.15,14,10),std(0xd9a27a),[0,1.72,0],0,tG);mesh(new THREE.BoxGeometry(.05,.05,.25),std(0x111111),[0,1.45,.2],0,tG);
+[-.1,.1].forEach(x=>mesh(new THREE.CapsuleGeometry(.07,.55,3,6),std(0x1f2a44),[x,.35,0],0,tG));
+const tPick=new THREE.Mesh(new THREE.CylinderGeometry(.45,.45,2,8),new THREE.MeshBasicMaterial({visible:false}));tPick.position.y=1;tG.add(tPick);
+const FOV=120*D2R,CONE_R=11;
+const coneMat=new THREE.MeshBasicMaterial({color:0xffd23c,transparent:true,opacity:.16,depthWrite:false,side:THREE.DoubleSide});
+const cone=new THREE.Mesh(new THREE.CircleGeometry(CONE_R,40,-FOV/2,FOV),coneMat);cone.rotation.x=-Math.PI/2;cone.position.y=.04;cone.renderOrder=2;
+const coneG=new THREE.Group();coneG.add(cone);scene.add(coneG);
+function sees(x,z){const dx=x-teacher.x,dz=z-teacher.z;const d=Math.hypot(dx,dz);if(d<1.2)return true;const a=Math.atan2(dx,dz);let diff=Math.abs(((a-teacher.face)+Math.PI*3)%TAU-Math.PI);return diff<=FOV/2;}
+function teacherHelping(st){return teacher.help===st.id;}
+function hulpPos(st){const T=TYPES[st.type];const lz=T.val?(T.val[2]+T.val[3])/2:0;const p=toWorld(st,(T.lanes[T.lanes.length-1]||0)+(T.exitSide?-T.exitSide*.7:1.2)-0.0,lz);const side=toWorld(st,-1.25,lz);return side;}
+
+/* ================= simulation ================= */
+const SIM={on:false,t:0,phase:'idle',pIdx:0,pT:0,ronde:0,speed:10,paused:false,incidents:[],stats:null,whistle:false,instrIssue:''};
+let S=[];// per-student state
+function lanesOf(st){if(!st.lanes||st.lanes.length!==TYPES[st.type].lanes.length)st.lanes=TYPES[st.type].lanes.map(x=>({x,queue:[],busy:[]}));return st.lanes;}
+function instrLayout(){const n=KC.N;const pts=[];let tPos,tFace,kidFace,issue='';
+  if(KC.instr==='noord'){for(let i=0;i<n;i++){const row=Math.floor(i/14),c=i%14;pts.push([-6.5+c*1.0,-6.2+row*.7]);}tPos=[0,-3.6];tFace=Math.PI;kidFace=0;issue='';}
+  else if(KC.instr==='zuid'){for(let i=0;i<n;i++){const row=Math.floor(i/14),c=i%14;pts.push([-6.5+c*1.0,5.9-row*.7]);}tPos=[0,3.3];tFace=0;kidFace=Math.PI;issue='tegenlicht';}
+  else{for(let i=0;i<n;i++){const a=i/n*TAU;pts.push([Math.sin(a)*2.9,Math.cos(a)*2.9]);}tPos=[0,3.6];tFace=Math.PI;kidFace=null;issue='kring';}
+  return {pts,tPos,tFace,kidFace,issue};}
+function phasesList(){return [{k:'instr',d:KC.instrT},{k:'naar',d:45},{k:'ronde',r:0,d:rondeSec()},{k:'wissel',d:70},{k:'ronde',r:1,d:rondeSec()},{k:'wissel',d:70},{k:'ronde',r:2,d:rondeSec()},{k:'slot',d:45}];}
+let PH=[];
+function vakFor(p,r){return ((p.group+r*KC.rot)%3+3)%3;}
+function startLesson(){computeWorld();R=mulberry32(4242+classSeed);PH=phasesList();SIM.on=true;SIM.t=0;SIM.pIdx=0;SIM.pT=0;SIM.ronde=0;SIM.incidents=[];SIM.paused=false;SIM.done=false;
+  SIM.stats={roundT:0,active:0,exec:0,wait:0,seenSum:0,seenN:0,riskSeenSum:0,riskSeenN:0,unrestSum:0,unrestN:0,misb:0,addressed:0,wisselT:[],maxQ:0,refusals:0,crossing:0};
+  stations.forEach(st=>{st.lanes=null;lanesOf(st);st.cool=0;});
+  const L=instrLayout();SIM.instr=L;SIM.instrIssue=L.issue;
+  S=klas.map((p,i)=>({x:L.pts[i][0],z:L.pts[i][1],y:0,st:'sit',face:L.kidFace!==null?L.kidFace:Math.atan2(-L.pts[i][0],-L.pts[i][1]),target:null,wp:[],station:null,lane:null,t:0,
+    unrest:clamp(.05+(p.type==='druk'?.12:0)+(L.issue==='tegenlicht'?.15:L.issue==='kring'?.05:0)+(KC.instrT>150?.12:0),0,1),waitT:0,active:0,exec:0,wait:0,turns:0,refusals:0,misbT:0,downT:0,seen:false,incCool:0}));
+  SIM.teacherHome={x:teacher.homeX,z:teacher.homeZ};teacher.help=null;$('#tHelp').value='';teacher.x=L.tPos[0];teacher.z=L.tPos[1];
+  teacher.face=L.tFace;whistle();updatePhaseCaption();}
+function curPhase(){return PH[SIM.pIdx];}
+function nextPhase(){const old=curPhase();if(old&&old.k==='wissel')SIM.stats.wisselT.push(SIM.pT);
+  SIM.pIdx++;SIM.pT=0;const p=curPhase();if(!p){endLesson();return;}
+  if(p.k==='naar'||p.k==='wissel'){if(p.k==='wissel')SIM.ronde++;const r=p.k==='naar'?0:SIM.ronde;
+    S.forEach((s,i)=>{leaveLane(i);const v=vakFor(klas[i],r);const cx=(VAKX[v]+VAKX[v+1])/2;s.wp=[[cx+(R()-.5)*3,(R()-.5)*4]];s.st='walk';
+      if(p.k==='wissel'){const from=vakFor(klas[i],r-1);if(Math.abs(from-v)===2)SIM.stats.crossing++;}});
+    if(p.k==='naar'&&!teacher.help){teacher.x=SIM.teacherHome.x;teacher.z=SIM.teacherHome.z;}}
+  if(p.k==='ronde'){SIM.ronde=p.r;S.forEach((s,i)=>{if(s.st!=='exec'&&s.st!=='down')joinQueue(i);});}
+  if(p.k==='slot'){S.forEach((s,i)=>{leaveLane(i);const L=SIM.instr;s.wp=[L.pts[i]];s.st='walk';s.sitAfter=true;});}
+  whistle();updatePhaseCaption();}
+function leaveLane(i){const s=S[i];if(s.station){const st=stations.find(x=>x.id===s.station);if(st){const ln=st.lanes[s.lane];ln.queue=ln.queue.filter(q=>q!==i);ln.busy=ln.busy.filter(q=>q!==i);}}if(s.st!=='exec')s.station=null;}
+function joinQueue(i){const s=S[i],p=klas[i];const vak=vakFor(p,SIM.ronde);const ss=stations.filter(st=>st.vak===vak);
+  if(!ss.length){s.st='idle';s.station=null;const cx=(VAKX[vak]+VAKX[vak+1])/2;s.wp=[[cx+(R()-.5)*4,(R()-.5)*6]];return;}
+  let best=null,bs=1e9;ss.forEach(st=>{const v=vOf(st);lanesOf(st).forEach((ln,li)=>{let sc=ln.queue.length+ln.busy.length*.5+R()*.6;
+    if(p.type==='angstig')sc+=v.risk*1.3;if(p.type==='dcd')sc+=v.risk*1.8;if(p.type==='uitblinker')sc+=(3-v.risk)*.9;if(p.type==='druk')sc+=(3-v.risk)*.3;if(sc<bs){bs=sc;best=[st,li];}});});
+  const [st,li]=best;s.station=st.id;s.lane=li;st.lanes[li].queue.push(i);s.st='queue';s.waitT=0;}
+function queuePos(st,li,k){const T=TYPES[st.type];const ln=st.lanes[li];return toWorld(st,ln.x,T.qz-k*.62);}
+function canStart(st,li){const T=TYPES[st.type],ln=st.lanes[li];if(ln.busy.length>=T.cap)return false;if(ln.busy.length&&S[ln.busy[ln.busy.length-1]].t<T.release)return false;
+  // landing zone must be clear of others (for landing apparatus, block if someone still in valzone)
+  return true;}
+function riskP(st,s,p){const v=vOf(st),T=TYPES[st.type];let pr=[0,.0002,.0006,.0015,.003][v.risk];
+  if(T.val&&v.mat){if(st.mat==='geen')pr*=9;else if(v.mat==='dik'&&st.mat==='dun')pr*=3.5;}if(T.optMat&&st.mat==='geen')pr*=1.6;
+  if(issues.some(i=>i.st===st&&i.sev==='crit'&&/uitloop|valzone raakt|staat in de|aanloop past/.test(i.txt)))pr*=3;
+  if(v.hulp&&!teacherHelping(st))pr*=2.6;if(p.skill===1)pr*=1.5;if(p.skill===3)pr*=.6;if(p.type==='druk')pr*=1.3;if(s.unrest>.6)pr*=1.5;return pr;}
+function addIncident(type,x,z,text,stId,dur){if(SIM.incidents.some(n=>stId!==undefined&&n.stId===stId&&SIM.t-n.t0<75))return;if(SIM.incidents.some(n=>SIM.t-n.t0<12))return;const inc={type,x,z,text,stId,t0:SIM.t,dur:dur||18,seen:false,done:false,el:null};SIM.incidents.push(inc);SND.ouch();}
+function simStep(dt){if(!SIM.on||SIM.done)return;SIM.t+=dt;SIM.pT+=dt;const p=curPhase();if(!p)return;
+  const st=SIM.stats;
+  // teacher position / facing
+  if(teacher.help){const hs=stations.find(x=>x.id===teacher.help);if(hs){const hp=hulpPos(hs);teacher.x=lerp(teacher.x,hp[0],clamp(dt*2,0,1));teacher.z=lerp(teacher.z,hp[1],clamp(dt*2,0,1));const c=toWorld(hs,0,TYPES[hs.type].val?(TYPES[hs.type].val[2]+TYPES[hs.type].val[3])/2:0);teacher.face=Math.atan2(c[0]-teacher.x,c[1]-teacher.z);}else teacher.help=null;}
+  else if(p.k==='instr'){teacher.face=SIM.instr.tFace;}
+  else if(teacher.auto){let cx=0,cz=0;S.forEach(s=>{cx+=s.x;cz+=s.z;});cx/=S.length;cz/=S.length;const f=Math.atan2(cx-teacher.x,cz-teacher.z);let d=((f-teacher.face)+Math.PI*3)%TAU-Math.PI;teacher.face+=d*clamp(dt*1.5,0,1);}
+  else teacher.face=teacher.manualFace;
+  // phases
+  if((p.k==='naar'||p.k==='wissel'||p.k==='slot')){const all=S.every(s=>s.st!=='walk'&&s.st!=='exec');if((all&&SIM.pT>4)||SIM.pT>p.d){if(p.k==='slot'&&SIM.pT<6){}else nextPhase();}}
+  else if(SIM.pT>=p.d){nextPhase();}
+  const ph=curPhase();if(!ph)return;
+  const inRonde=ph.k==='ronde';
+  // students
+  let seen=0,unrestSum=0;
+  S.forEach((s,i)=>{const pp=klas[i];s.seen=sees(s.x,s.z);if(s.seen)seen++;s.incCool=Math.max(0,s.incCool-dt);
+    const walkTo=(tx,tz,sp)=>{const dx=tx-s.x,dz=tz-s.z,d=Math.hypot(dx,dz);if(d<.05)return true;const m=Math.min(d,(sp||1.25)*dt);s.x+=dx/d*m;s.z+=dz/d*m;s.face=Math.atan2(dx,dz);s.moving=true;return d<.15;};
+    s.moving=false;s.y=0;
+    switch(s.st){
+      case 'sit':break;
+      case 'walk':{if(!s.wp.length){if(s.sitAfter){s.st='sit';s.face=SIM.instr.kidFace!==null?SIM.instr.kidFace:Math.atan2(-s.x,-s.z);}else if(inRonde)joinQueue(i);else s.st='wait';break;}const w=s.wp[0];if(walkTo(w[0],w[1],pp.type==='dromer'?1.0:1.3))s.wp.shift();break;}
+      case 'wait':{if(inRonde)joinQueue(i);break;}
+      case 'idle':{if(!s.wp.length||walkTo(s.wp[0][0],s.wp[0][1],.6)){const v=vakFor(pp,SIM.ronde);const cx=(VAKX[v]+VAKX[v+1])/2;s.wp=[[cx+(R()-.5)*5,(R()-.5)*8]];}s.waitT+=dt;break;}
+      case 'queue':{const stn=stations.find(x=>x.id===s.station);if(!stn){s.st='wait';break;}const ln=stn.lanes[s.lane];const k=ln.queue.indexOf(i);if(k<0){joinQueue(i);break;}
+        const q=queuePos(stn,s.lane,k);const there=walkTo(q[0],q[1],1.3);s.waitT+=dt;
+        if(there){const T=TYPES[stn.type];const f=toWorld(stn,ln.x,T.qz+1);s.face=Math.atan2(f[0]-s.x,f[1]-s.z);}
+        if(k===0&&there&&inRonde&&canStart(stn,s.lane)){const v=vOf(stn);
+          // refusal for anxious / DCD on risky apparatus without help nearby
+          const near=Math.hypot(teacher.x-s.x,teacher.z-s.z)<3.5||teacherHelping(stn);
+          if((pp.type==='angstig'&&v.risk>=3&&!near&&R()<.55)||(pp.type==='dcd'&&v.risk>=3&&!near&&R()<.7)||(pp.type==='angstig'&&v.risk===2&&R()<.12)){ln.queue.shift();s.refusals++;st.refusals++;ln.queue.push(i);s.st='queue';s.waitT+=2;break;}
+          ln.queue.shift();ln.busy.push(i);s.st='exec';s.t=0;s.waitT=0;s.dur=v.dur*(pp.type==='angstig'?1.2:pp.type==='uitblinker'?.85:pp.type==='dcd'?1.4:1)*(.9+R()*.2);
+          s.willFall=R()<riskP(stn,s,pp);s.turns++;SND.go(stn.type);}
+        break;}
+      case 'exec':{const stn=stations.find(x=>x.id===s.station);if(!stn){s.st='wait';break;}const T=TYPES[stn.type],v=vOf(stn),ln=stn.lanes[s.lane];
+        s.t+=dt/s.dur;const lp=T.path(Math.min(s.t,1),v,matH(stn));const w=toWorld(stn,ln.x+lp[0],lp[2]);s.x=w[0];s.z=w[1];s.y=lp[1];s.face=stn.rot*Math.PI/2;s.moving=true;
+        if(s.willFall&&s.t>.8){s.willFall=false;const txt=stn.mat==='geen'&&T.val?'Valt op de harde vloer':T.act==='springen'?'Landt verkeerd':T.act==='klimmen'?'Valt uit het touw/rek':'Valt van het toestel';addIncident('val',s.x,s.z,txt,stn.id,20);s.st='down';s.downT=8;ln.busy=ln.busy.filter(q=>q!==i);break;}
+        // collision check: someone else in my landing zone during landing phase
+        if(T.val&&s.t>.6&&s.t<.9){const W=stn.W.val;S.forEach((o,j)=>{if(j!==i&&o.st!=='exec'&&o.st!=='down'&&inRect(W,o.x,o.z)&&s.incCool<=0&&o.incCool<=0&&R()<.015){addIncident('botsing',o.x,o.z,'Botsing bij de landing',stn.id,14);s.incCool=20;o.incCool=20;}});}
+        if(s.t>=1){ln.busy=ln.busy.filter(q=>q!==i);s.st='return';const side=(T.exitSide||0)*(ln.x<0?-1:1)||T.exitSide;const a=toWorld(stn,ln.x+side,T.endZ),b=toWorld(stn,ln.x+side,T.qz-1.8);s.wp=T.exitSide?[a,b]:[];s.unrest=Math.max(0,s.unrest-(pp.type==='uitblinker'&&v.risk<=1?.02:.12));}
+        break;}
+      case 'return':{if(!s.wp.length){if(inRonde)joinQueue(i);else s.st='wait';break;}const w=s.wp[0];if(walkTo(w[0],w[1],1.35))s.wp.shift();break;}
+      case 'down':{s.downT-=dt*(s.seenInc?2.5:1);s.y=0;if(s.downT<=0){if(inRonde)joinQueue(i);else s.st='wait';}break;}
+      case 'misb':{s.misbT-=dt;if(!s.wp.length||walkTo(s.wp[0][0],s.wp[0][1],1.8)){s.wp=[[clamp(s.x+(R()-.5)*8,-ZX+.5,ZX-.5),clamp(s.z+(R()-.5)*8,-ZZ+.5,ZZ-.5)]];if(R()<.35)s.wp=[[clamp(-8+R()*6,-ZX+.5,ZX-.5),6.2]];}
+        if(s.z>5.9&&s.x>WB_X0&&s.x<WB_X1){s.y=Math.min(1.6,(s.y||0)+dt);if(s.incCool<=0&&R()<.02){addIncident('klim',s.x,s.z,'Klimt zonder toezicht in het wandrek',undefined,14);s.incCool=25;}}
+        stations.forEach(o=>{if(o.W.val&&inRect(o.W.val,s.x,s.z)&&s.incCool<=0&&R()<.03){addIncident('botsing',s.x,s.z,'Rent door een landingszone',o.id,12);s.incCool=20;}});
+        if(s.seen){s.misbT-=dt*3;}
+        if(s.misbT<=0){s.unrest=.45;if(inRonde)joinQueue(i);else s.st='wait';}break;}
+    }
+    // unrest dynamics
+    const waiting=s.st==='queue'&&s.waitT>3||s.st==='idle'||s.st==='wait'||s.st==='sit'&&ph.k==='instr'&&SIM.pT>60;
+    const ti=TYPE_INFO[pp.type];
+    if(waiting){let rate=ti.rate*(1+Math.max(0,(s.waitT-30)/30));if(s.st==='idle')rate*=1.8;const stn=stations.find(x=>x.id===s.station);if(pp.type==='uitblinker'&&stn&&vOf(stn).risk<=1)rate*=1.6;if(ph.k==='instr')rate*=.6;s.unrest=Math.min(1,s.unrest+rate*dt);}
+    else if(s.st==='exec'||s.st==='return')s.unrest=Math.max(0,s.unrest-.03*dt);
+    if(inRonde&&s.unrest>.85&&s.st==='queue'&&!s.seen&&R()<dt*.25){leaveLane(i);s.st='misb';s.misbT=10+R()*8;s.wp=[];st.misb++;}
+    if(inRonde&&s.unrest>.75&&s.st==='queue'&&pp.type==='druk'&&s.incCool<=0){const stn=stations.find(x=>x.id===s.station);if(stn&&stn.lanes[s.lane].queue.length>=5&&R()<dt*(s.seen?.012:.05)){addIncident('duw',s.x,s.z,'Duwen en trekken in de rij',undefined,12);s.incCool=45;}}
+    unrestSum+=s.unrest;
+    if(inRonde){st.roundT+=dt/S.length;if(s.st==='exec'||s.st==='return'||(s.st==='walk'))st.active+=dt/S.length;if(s.st==='exec')st.exec+=dt/S.length;if(s.st==='queue'||s.st==='idle'||s.st==='wait')st.wait+=dt/S.length;
+      s.active+=(s.st==='exec'||s.st==='return'||s.st==='walk')?dt:0;s.exec+=s.st==='exec'?dt:0;}
+  });
+  // separation for non-executing kids
+  for(let i=0;i<S.length;i++)for(let j=i+1;j<S.length;j++){const a=S[i],b=S[j];if(a.st==='exec'||b.st==='exec'||a.st==='sit'||b.st==='sit')continue;const dx=a.x-b.x,dz=a.z-b.z,d=Math.hypot(dx,dz);if(d<.42&&d>1e-4){const p=(.42-d)/2/d;a.x+=dx*p;a.z+=dz*p;b.x-=dx*p;b.z-=dz*p;}}
+  // teacher addresses restless kids in view
+  SIM.addrT=(SIM.addrT||0)-dt;if(SIM.addrT<=0&&inRonde){SIM.addrT=7;let w=null,wu=.5;S.forEach(s=>{if(s.seen&&s.unrest>wu&&s.st!=='exec'&&(!teacher.help||Math.hypot(s.x-teacher.x,s.z-teacher.z)<6)){wu=s.unrest;w=s;}});if(w){w.unrest=Math.max(0,w.unrest-.45);st.addressed++;if(w.st==='misb')w.misbT=0;}}
+  // incidents: seen?
+  SIM.incidents.forEach(n=>{if(n.done)return;if(!n.seen&&sees(n.x,n.z)){n.seen=true;n.dur=Math.min(n.dur,(SIM.t-n.t0)+4);S.forEach(s=>{if(Math.hypot(s.x-n.x,s.z-n.z)<.6)s.seenInc=true;});}if(SIM.t-n.t0>n.dur)n.done=true;});
+  if(inRonde){st.seenSum+=seen/S.length*dt;st.seenN+=dt;st.unrestSum+=unrestSum/S.length*dt;st.unrestN+=dt;
+    const riskSt=stations.filter(x=>vOf(x).risk>=3);if(riskSt.length){const f=riskSt.filter(x=>sees(x.x,x.z)).length/riskSt.length;st.riskSeenSum+=f*dt;st.riskSeenN+=dt;}
+    let mq=0;stations.forEach(x=>(x.lanes||[]).forEach(l=>mq=Math.max(mq,l.queue.length)));st.maxQ=Math.max(st.maxQ,mq);SIM.curMaxQ=mq;}
+  SIM.curSeen=seen/S.length;SIM.curUnrest=unrestSum/S.length;
+}
+function endLesson(){SIM.done=true;whistle();showReport();}
+
+/* ================= report ================= */
+let lastReport=null,prevReport=null;
+function computeScores(){const st=SIM.stats;const bew=st.roundT?st.active/st.roundT:0,oef=st.roundT?st.exec/st.roundT:0;
+  const zicht=st.seenN?st.seenSum/st.seenN:0,riskZ=st.riskSeenN?st.riskSeenSum/st.riskSeenN:1,unrest=st.unrestN?st.unrestSum/st.unrestN:0;
+  const inc=SIM.incidents.length,missed=SIM.incidents.filter(n=>!n.seen).length;const crit=issues.filter(i=>i.sev==='crit').length,warn=issues.length-crit;
+  const sB=clamp((bew-.25)/.45*10,0,10);
+  const incW=SIM.incidents.reduce((a,n)=>a+(n.type==='duw'?.35:n.type==='klim'?.6:1.1),0);const sV=clamp(10-2*crit-.6*warn-incW-.8*missed,0,10);
+  const sO=clamp((zicht-.45)/.45*10*.7+riskZ*3-missed*.6,0,10);
+  const sR=clamp(10-unrest*16-st.misb*.5,0,10);
+  const bal=(sB+sV+sO+sR+2*Math.min(sB,sV,sO,sR))/6;
+  const turns=S.map(s=>s.turns);const avgT=turns.reduce((a,b)=>a+b,0)/turns.length;const minT=Math.min(...turns);
+  return {bew,oef,zicht,riskZ,unrest,inc,missed,crit,warn,sB,sV,sO,sR,bal,avgT,minT,refusals:st.refusals,maxQ:st.maxQ,misb:st.misb,addressed:st.addressed,crossing:st.crossing,wissel:st.wisselT.length?st.wisselT.reduce((a,b)=>a+b,0)/st.wisselT.length:0};}
+function tipsFor(r){const t=[];
+  if(r.crit)t.push([9,'Los eerst de rode punten in de <b>Check</b> op: matten, uitloop en toestellen in elkaars zone.']);
+  if(r.sB<6)t.push([8-r.sB/2,`Leerlingen bewogen maar ${pct(r.bew)} van de tijd. Zet in drukke vakken een <b>tweede uitvoeringsmogelijkheid</b> neer (bijv. twee banken of twee touwen), zodat de rijen korter worden.`]);
+  const hv=new Set(stations.filter(s=>vOf(s).hulp).map(s=>s.vak));if(hv.size>1)t.push([7,'Je had in meer dan één vak <b>hulpverlening</b> nodig. Je kunt maar op één plek staan: maak één vak het hulpverleningsvak en richt de andere vakken zelfstandig in.']);
+  if(r.sO<6)t.push([8-r.sO/2,`Je zag gemiddeld ${pct(r.zicht)} van de klas. Ga aan de <b>buitenkant</b> staan, met je rug naar de wand, zodat alle vakken in je blikveld liggen.`]);
+  if(r.missed)t.push([6.5,`${r.missed} incident${r.missed>1?'en':''} gebeurde${r.missed>1?'n':''} buiten je blikveld. Kies een plek waar je het risicovolste vak dichtbij hebt én de rest ziet.`]);
+  if(r.refusals>3)t.push([6,`Voorzichtige leerlingen weigerden ${r.refusals} keer. Bied een <b>makkelijkere variant</b> aan (bijv. lage kast naast hoge kast) of sta dichter bij het spannende toestel.`]);
+  if(r.sR<6)t.push([7-r.sR/2,'Er was veel onrust. Onrust komt vooral van <b>wachten</b>: kortere rijen, een kortere uitleg en de onrustige leerlingen in je blikveld helpen.']);
+  if(SIM.instrIssue==='tegenlicht')t.push([5,'Bij de uitleg keken de leerlingen <b>tegen het licht</b> van de ramen in. Laat ze met hun rug naar de ramen zitten.']);
+  if(KC.instrT>150)t.push([4.5,'De uitleg duurde lang. Houd de instructie kort en leg per vak de kern uit als de groep er staat.']);
+  if(r.crossing)t.push([4,'Bij het doordraaien liepen groepjes <b>dwars door een ander vak</b>. Draai zo door dat niemand door een vak hoeft waar al gewerkt wordt.']);
+  if(!t.length)t.push([1,'Sterke les! Probeer het nu met een drukkere klas (meer drukke leerlingen) of een hogere groep.']);
+  return t.sort((a,b)=>b[0]-a[0]).slice(0,4).map(x=>x[1]);}
+function scoreCol(v){return v>=7.5?'#5fd38d':v>=5.5?'#ffcb3d':v>=4?'#ff9a3d':'#ff5a4a';}
+function showReport(){const r=computeScores();prevReport=lastReport;lastReport=r;
+  const tile=(lab,v,main)=>`<div class="score${main?' main':''}"><small>${lab}</small><b style="color:${scoreCol(v)}">${v.toFixed(1).replace('.',',')}</b><i><span style="width:${v*10}%;background:${scoreCol(v)}"></span></i></div>`;
+  const cmp=prevReport?`<p class="cmp">Vorige poging: balans ${prevReport.bal.toFixed(1).replace('.',',')} · bewegen ${prevReport.sB.toFixed(1).replace('.',',')} · veiligheid ${prevReport.sV.toFixed(1).replace('.',',')} · overzicht ${prevReport.sO.toFixed(1).replace('.',',')} · rust ${prevReport.sR.toFixed(1).replace('.',',')}</p>`:'';
+  $('#repBody').innerHTML=`<h2>Lesrapport</h2><p>Groep ${KC.groep} · ${KC.N} leerlingen · ${stations.length} toestellen · ${KC.ronde} minuten per vak</p>
+   <div class="scores">${tile('Balans',r.bal,true)}${tile('Bewegen',r.sB)}${tile('Veiligheid',r.sV)}${tile('Overzicht',r.sO)}${tile('Rust',r.sR)}</div>${cmp}
+   <h3>Tips voor je volgende opstelling</h3><ul class="tips">${tipsFor(r).map(t=>`<li>${t}</li>`).join('')}</ul>
+   <h3>De cijfers</h3><table class="rtable">
+   <tr><td>Bewegingstijd (oefenen en teruglopen)</td><td>${pct(r.bew)}</td></tr><tr><td>Oefentijd (echt op het toestel)</td><td>${pct(r.oef)}</td></tr>
+   <tr><td>Beurten per leerling (gemiddeld · minimaal)</td><td>${r.avgT.toFixed(1).replace('.',',')} · ${r.minT}</td></tr><tr><td>Langste rij</td><td>${r.maxQ}</td></tr>
+   <tr><td>Gemiddeld in je blikveld · risicovakken in beeld</td><td>${pct(r.zicht)} · ${pct(r.riskZ)}</td></tr><tr><td>Incidenten · waarvan gemist</td><td>${r.inc} · ${r.missed}</td></tr>
+   <tr><td>Keren gerommeld · leerlingen aangesproken</td><td>${r.misb} · ${r.addressed}</td></tr><tr><td>Weigeringen (te spannend)</td><td>${r.refusals}</td></tr>
+   <tr><td>Gemiddelde wisseltijd</td><td>${Math.round(r.wissel)} s</td></tr><tr><td>Kritieke punten · aandachtspunten in de opstelling</td><td>${r.crit} · ${r.warn}</td></tr></table>
+   ${SIM.incidents.length?`<h3>Incidenten</h3><ul>${SIM.incidents.map(n=>`<li>${fmtT(n.t0)} · ${n.text} · <b style="color:${n.seen?'#ff9a3d':'#ff5a4a'}">${n.seen?'opgemerkt':'gemist'}</b></li>`).join('')}</ul>`:''}
+   <p style="margin-top:16px;display:flex;gap:8px;flex-wrap:wrap"><button class="btn acc" id="rAgain">↻ Opnieuw lesgeven</button><button class="btn" id="rEdit">Terug naar inrichten</button><button class="btn" id="rClose">Sluiten</button></p>
+   <p class="hint">Bewegen: aandeel van de werktijd dat leerlingen niet wachten. Overzicht: hoeveel van de klas en de risicovakken je zag. De balans weegt je zwakste punt extra mee: een veilige les waarin niemand beweegt, is ook geen goede les.</p>`;
+  $('#report').classList.add('open');$('#rAgain').onclick=()=>{$('#report').classList.remove('open');startLesson();};$('#rEdit').onclick=()=>{$('#report').classList.remove('open');setMode('edit');};$('#rClose').onclick=()=>$('#report').classList.remove('open');}
+
+/* ================= presets ================= */
+const PRESETS={
+ ssb:{label:'Springen · zwaaien · balanceren',st:[['kast',-8.7,.9,0,'hoog','dik'],['bok',-5.4,.7,0,'laag','dun'],['ringen',-1.7,0,0,'laag','dun'],['ringen',1.7,0,0,'laag','dun'],['bank',5.0,0,0,'breed'],['bank',7.2,0,0,'smal'],['balk',9.9,0,0,'std','dun']],teacher:[-3.7,6.2]},
+ klim:{label:'Klimmen · zwaaien · mikken',st:[['wandrek',-6,0,0,'std','dun'],['touwen',-7.2,-2.6,0,'half','dun'],['ringen',-1.7,-.5,0,'hoog','dun'],['ringen',1.7,-.5,0,'laag','dun'],['mikken',6.3,-.5,0,'std'],['bank',9.4,0,0,'smal']],teacher:[0,6.3]},
+ fout:{label:'Fouten-zaal',st:[['kast',-7.7,-1,3,'hoog','dun'],['tramp',0.2,-1.6,0,'std','dun'],['ringen',2.2,3.4,0,'hoog','geen'],['bank',7.3,0,0,'breed']],teacher:[0,0]},
+ leeg:{label:'Lege zaal',st:[],teacher:[0,6.2]},
+};
+function loadPreset(k){stations.forEach(s=>stG.remove(s.g));stations=[];selected=null;teacher.help=null;teacher.dragged=false;const P=PRESETS[k];P.st.forEach(a=>addStation(a[0],a[1],a[2],a[3],a[4],a[5]));teacher.x=teacher.homeX=P.teacher[0];teacher.z=teacher.homeZ=P.teacher[1];$('#preset').value=k;layoutChanged();if(mode==='run')startLesson();}
+
+/* ================= points ================= */
+const POINTS=[
+ {name:'Het 3-vakkensysteem',lat:'Lesorganisatie · drie groepen, drie vakken',at:()=>V(0,3.4,-5.5),view:[[0,26,13],[0,0,0]],tabs:[
+  `<p>Bij het <b>3-vakkensysteem</b> verdeel je de zaal in drie vakken en de klas in drie groepjes. Elk groepje werkt in een eigen vak aan een eigen activiteit. Na een vaste tijd (vaak 5 à 7 minuten) fluit je en draaien de groepjes door.</p><p>Zo kan de hele klas tegelijk bewegen, ook al heb je van elk toestel maar één exemplaar.</p>`,
+  `<p>Een sterke opstelling heeft per vak <b>één leeractiviteit</b> met meerdere uitvoeringsmogelijkheden, korte rijen en duidelijke looproutes. Vaak is één vak het <b>hulpverleningsvak</b>, waar de docent staat, en kunnen de andere twee vakken zelfstandig.</p>`,
+  `<p class="calc">27 leerlingen / 3 vakken = 9 per vak<br>3 rondes × 6 min = 18 min werktijd<br>met 1 toestel per vak en 20 s per beurt:<br>9 × 20 s = 3 min per rondje → 2 beurten per ronde</p>`,
+  `<p class="think">Waarom is het 3-vakkensysteem in het basisonderwijs zo populair, terwijl het opbouwen meer tijd kost dan één toestel voor de hele klas?</p>`]},
+ {name:'Docentpositie & overzicht',lat:'Rug naar de wand · buitenkant',at:()=>V(teacher.x,2.6,teacher.z),view:[[8,16,22],[0,0,2]],tabs:[
+  `<p>Wat je niet ziet, kun je niet bijsturen. De gele kegel is je <b>blikveld</b>. Vuistregels: sta aan de <b>buitenkant</b> van de zaal, met je <b>rug naar de wand</b>, zodat alle vakken voor je liggen.</p>`,
+  `<p>Sleep de docent in de lesmodus naar het midden van de zaal en kijk wat er gebeurt met het percentage ‘in je blikveld’. Leerlingen die onrustig zijn en niet gezien worden, gaan rommelen of klimmen ergens op.</p>`,
+  `<p class="calc">blikveld in dit model: 120°<br>midden in de zaal: ±1/3 van de klas achter je<br>aan de lange wand: bijna alles voor je</p>`,
+  `<p class="think">Een collega zegt: “Ik loop gewoon de hele les rond, dan zie ik alles.” Wat is het nadeel daarvan?</p>`]},
+ {name:'Valzones & matten',lat:'Landen · vallen · uitloop',at:()=>{const s=stations.find(x=>TYPES[x.type].val);return s?V(s.W.val[0],1,s.W.val[2]):V(-8,1,1);},view:[[-4,12,10],[-7,0,1]],tabs:[
+  `<p>Overal waar een leerling kan landen of vallen ligt een <b>valzone</b> (rood als die niet goed bedekt is, groen als het klopt). Bij springen en hoge toestellen hoort een <b>dikke valmat</b>; bij lager werk is een dunne mat genoeg.</p><p>Oranje is de <b>uitloop</b>: na de landing loopt de leerling door. Daar mag niets staan, en zeker geen muur.</p>`,
+  `<p>Let op de combinatie van toestellen: een wachtrij die in de uitloop van een ander toestel staat, of een teruglooproute door een landing, is in de praktijk een van de bekendste oorzaken van botsingen.</p>`,
+  `<p class="calc">valzone springkast: 2 m breed × 2,3 m diep<br>uitloop: nog 1,4 m vrij daarachter<br>aanloop: ±3,5 m vrij ervoor</p>`,
+  `<p class="think">Waarom is een te dunne mat soms gevaarlijker dan je denkt, ook al ligt er wél een mat?</p>`]},
+ {name:'Wachten & bewegingstijd',lat:'Actieve leertijd · rijen',at:()=>V(5.2,1.5,-3.6),view:[[10,12,6],[6,0,-1]],tabs:[
+  `<p><b>Bewegingstijd</b> is de tijd dat leerlingen echt bewegen in plaats van wachten. In dit model telt oefenen én teruglopen mee; alleen in de rij staan telt niet.</p>`,
+  `<p>Lange rijen kosten bewegingstijd én rust: wie lang wacht, wordt onrustig. Meerdere uitvoeringsmogelijkheden per vak (twee banken, twee touwen, drie mikplekken) maken rijen korter.</p>`,
+  `<p class="calc">9 leerlingen, 1 bank, 2 tegelijk, 8 s per beurt:<br>doorstroom ≈ 1 leerling per 4 s<br>rondje = 9 × 4 s = 36 s → 8 s oefenen = 22%<br>met 2 banken: 18 s per rondje → 44%</p>`,
+  `<p class="think">Wat is beter: één spannend toestel waar iedereen op wil, of twee eenvoudigere varianten naast elkaar? Bekijk het in het lesrapport.</p>`]},
+ {name:'Hulpverlenen',lat:'Helpen · begeleiden · vangen',at:()=>{const s=stations.find(x=>vOf(x).hulp);return s?V(hulpPos(s)[0],1.8,hulpPos(s)[1]):V(-8,1.5,0);},view:[[-2,10,10],[-7,0,0]],tabs:[
+  `<p>Bij een hoge kast, de bok, de minitrampoline en hangend zwaaien aan de ringen staat de docent (of een getrainde leerling) erbij om te <b>hulpverlenen</b>: begeleiden, ondersteunen en zo nodig vangen.</p>`,
+  `<p>Hier zit het dilemma. Als je hulpverleent, kijk je naar dát toestel en zie je de rest minder. Kies daarom per les <b>één hulpverleningsvak</b> en richt de andere vakken zo in dat leerlingen er zelfstandig en veilig kunnen werken.</p><p>Probeer het in de lesmodus: kies bij ‘Hulpverlenen’ een toestel en kijk wat er met je blikveld gebeurt.</p>`,
+  `<p class="calc">kans op een incident bij een hulp-toestel zonder hulp:<br>in dit model ± 2,5 × zo groot<br>voorzichtige leerlingen weigeren vaker</p>`,
+  `<p class="think">Hoe zou je je plek kiezen als je wél hulpverleent: met welke kant naar de zaal ga je staan?</p>`]},
+ {name:'Instructie & licht',lat:'Uitleg · zitplek · ramen',at:()=>V(0,2,-5.2),view:[[0,9,4],[0,1.5,-6]],tabs:[
+  `<p>Waar zit de klas bij de uitleg? Laat leerlingen met hun <b>rug naar de ramen</b> en naar de toestellen zitten, zodat ze niet tegen het licht in kijken en niet afgeleid worden. Houd de uitleg <b>kort</b>.</p>`,
+  `<p>Kies bij ‘Klas &amp; les’ de instructieplek. ‘Bank tegenover de ramen’ betekent: leerlingen kijken tegen het licht in. Een lange uitleg (3,5 min) maakt de klas onrustig voordat er iets is gebeurd.</p>`,
+  `<p class="calc">uitleg 2 min van een les van 25 min = 8%<br>uitleg 3,5 min = 14% van de tijd stilzitten</p>`,
+  `<p class="think">Welke informatie geef je vooraf aan de hele klas, en welke pas als het groepje bij het vak staat?</p>`]},
+ {name:'Doordraaien',lat:'Wisselen · fluitsignaal · looproutes',at:()=>V(VAKX[1],2.2,4.5),view:[[0,14,16],[0,0,1]],tabs:[
+  `<p>Na het fluitsignaal ruimen leerlingen niets op maar <b>draaien ze door</b> naar het volgende vak. Spreek vooraf de draairichting af en laat ze rustig lopen.</p>`,
+  `<p>Bij drie vakken op een rij moet één groepje bij elke wissel van vak 3 naar vak 1 (of andersom): dwars door de zaal. Kijk in het lesrapport naar ‘wisseltijd’ en de tip over looproutes.</p>`,
+  `<p class="calc">2 wissels × ± 40 s = 1 min 20 s<br>bij 18 min werktijd: ± 7% van de tijd</p>`,
+  `<p class="think">Hoe zou je de wissel zo regelen dat niemand door een vak loopt waar nog gesprongen wordt?</p>`]},
+ {name:'Differentiëren',lat:'Meerdere uitvoeringsmogelijkheden',at:()=>V(7.4,1.6,2.6),view:[[12,10,10],[7,0,0]],tabs:[
+  `<p>Leerlingen verschillen: <b>voorzichtige</b> leerlingen haken af bij een te spannend toestel, <b>uitblinkers</b> vervelen zich bij een te makkelijk toestel, en een leerling met <b>DCD</b> heeft een makkelijkere variant nodig.</p>`,
+  `<p>Zet in een vak een makkelijke en een moeilijke variant naast elkaar (brede en smalle bank, lage en hoge kast). In de simulatie kiezen leerlingen zelf: voorzichtige leerlingen het makkelijkere toestel, uitblinkers het spannendere.</p>`,
+  `<p class="calc">klik in de lesmodus op een leerling:<br>je ziet type, beurten en hoe lang die wachtte</p>`,
+  `<p class="think">Is het eerlijk dat niet iedereen hetzelfde toestel doet? Hoe leg je dat uit aan de klas?</p>`]},
+];
+const mkWrap=$('#markers');
+const MK=POINTS.map((p,i)=>{const b=document.createElement('button');b.className='mk';b.innerHTML=`<b>${i+1}</b><span>${p.name}</span>`;b.addEventListener('click',e=>{e.stopPropagation();openPoint(i);});mkWrap.appendChild(b);return b;});
+const VL=[0,1,2].map(k=>{const d=document.createElement('div');d.className='vl';mkWrap.appendChild(d);return d;});
+let incEls=[];const SL=[];
+const _p=V(0,0,0);
+function project(v,el,ox,oy){_p.copy(v).project(camera);if(_p.z>1){el.style.display='none';return false;}el.style.display='';el.style.transform=`translate(${(_p.x*.5+.5)*innerWidth-(ox||12)}px,${(-_p.y*.5+.5)*innerHeight-(oy||12)}px)`;return true;}
+function updateMarkers(){POINTS.forEach((p,i)=>project(p.at(),MK[i]));
+  VL.forEach((el,k)=>{const cx=(VAKX[k]+VAKX[k+1])/2;el.innerHTML=`VAK ${k+1}`+(mode==='run'&&SIM.on&&curPhase()&&curPhase().k==='ronde'?` · <span style="color:${GROUPS[klas.findIndex(p=>vakFor(p,SIM.ronde)===k)>=0?klas.find(p=>vakFor(p,SIM.ronde)===k).group:0].css}">${GROUPS[klas.find(p=>vakFor(p,SIM.ronde)===k)?.group??0].name}</span>`:'');project(V(cx,.1,-ZZ+.5),el,30,0);});
+  // incidents
+  while(incEls.length<SIM.incidents.length){const d=document.createElement('div');d.className='inc';mkWrap.appendChild(d);incEls.push(d);}
+  SIM.incidents.forEach((n,k)=>{const el=incEls[k];if(n.done||mode!=='run'){el.style.display='none';return;}el.className='inc '+(n.seen?'seen':'miss');el.textContent=(n.seen?'👀 ':'⚠ ')+n.text;project(V(n.x,2.2,n.z),el,60,10);});
+  for(let k=SIM.incidents.length;k<incEls.length;k++)incEls[k].style.display='none';
+  QMK.forEach(q=>project(q.fn(),q.el));}
+let curPoint=null,tab=0;
+function openPoint(i){closeQuiz();const p=POINTS[i];curPoint=p;p.i=i;tab=0;$('#iNum').textContent=i+1;$('#iTitle').textContent=p.name;$('#iLat').textContent=p.lat;$('#iPos').textContent=`${i+1} / ${POINTS.length}`;MK.forEach((m,j)=>m.classList.toggle('on',j===i));setTab(0);$('#info').classList.add('open');flyTo(p.view[0],p.view[1]);}
+function setTab(n){tab=n;$$('#iTabs button').forEach(b=>b.classList.toggle('on',+b.dataset.tab===n));$('#iBody').innerHTML=curPoint.tabs[n];}
+function closeInfo(){$('#info').classList.remove('open');curPoint=null;MK.forEach(m=>m.classList.remove('on'));}
+$$('#iTabs button').forEach(b=>b.addEventListener('click',()=>setTab(+b.dataset.tab)));$('#iClose').addEventListener('click',closeInfo);
+$('#iPrev').addEventListener('click',()=>{if(curPoint&&curPoint.i>0)openPoint(curPoint.i-1);});$('#iNext').addEventListener('click',()=>{if(curPoint&&curPoint.i<POINTS.length-1)openPoint(curPoint.i+1);});
+function next(){if(quizOpen)return;if(!curPoint){openPoint(0);return;}if(tab<3)setTab(tab+1);else if(curPoint.i<POINTS.length-1)openPoint(curPoint.i+1);}
+function prev(){if(quizOpen||!curPoint)return;if(tab>0)setTab(tab-1);else if(curPoint.i>0){openPoint(curPoint.i-1);setTab(3);}}
+
+/* ================= missions ================= */
+const QUIZ=[
+ {t:'R',type:'multi',preset:'fout',q:'De <b>fouten-zaal</b> is geladen. Kijk goed (en gebruik de valzones). Welke fouten zie je? Kies er <b>vijf</b>.',
+  opts:['De springkast landt richting de muur: geen uitloop','De aanloop van de kast loopt over de vaklijn','De minitrampoline heeft een te dunne mat','Onder de ringen ligt geen mat','Meerdere vakken hebben hulpverlening nodig','De bank staat te dicht bij de ramen','De ringen hangen te laag','In vak 3 staan te veel toestellen'],ok:[0,1,2,3,4],
+  ex:'Allemaal te zien in het tabblad Check. Zet de overlay aan en vergelijk met de voorbeeldles “springen · zwaaien · balanceren”.'},
+ {t:'R',type:'mc',q:'Waar sta je als docent het best terwijl de groepjes in de vakken werken?',opts:['Midden in de zaal, dan ben je overal snel','Aan de buitenkant, met je rug naar de wand en alle vakken voor je','Bij de deur van de berging, dan kun je snel materiaal pakken','Steeds bij het groepje dat het meest lawaai maakt'],ok:1,ex:'Aan de buitenkant met je rug naar de wand heb je alle vakken in je blikveld. Midden in de zaal staat altijd een deel van de klas achter je.'},
+ {t:'T1',type:'num',q:'In een vak staan 9 leerlingen bij één bank. Er kunnen 2 leerlingen tegelijk op, en elke 4 seconden kan er een nieuwe beginnen. Hoeveel beurten krijgt elke leerling in een ronde van 6 minuten?',answer:10,tol:0,unit:'beurten',ex:'Elke 4 s start er iemand: 360 / 4 = 90 starts per ronde. Verdeeld over 9 leerlingen = 10 beurten per leerling.'},
+ {t:'T1',type:'sim',preset:'ssb',q:'Laad de voorbeeldles (gebeurt automatisch) en geef les. Zorg dat de <b>bewegingstijd minstens 60%</b> is. Tip: kijk welk vak de langste rij heeft.',check:()=>lastReport&&lastReport.bew>=.6,fail:()=>lastReport?`Bewegingstijd was ${pct(lastReport.bew)}. Zet in het vak met de langste rij een extra uitvoeringsmogelijkheid neer.`:'Geef eerst een les (Lesgeven) tot het lesrapport verschijnt.',ok:'Mooi! Meer plekken tegelijk betekent kortere rijen en meer bewegingstijd.'},
+ {t:'T2',type:'sim',q:'<b>Hulpverlenen of overzicht?</b> Richt de zaal zo in dat maar één vak hulpverlening nodig heeft, en kies een plek waarvandaan je helpt én overzicht houdt. Doel: <b>0 gemiste incidenten</b> en <b>overzicht ≥ 7</b>.',check:()=>lastReport&&lastReport.missed===0&&lastReport.sO>=7&&new Set(stations.filter(s=>vOf(s).hulp).map(s=>s.vak)).size<=1,fail:()=>!lastReport?'Geef eerst een les.':new Set(stations.filter(s=>vOf(s).hulp).map(s=>s.vak)).size>1?'Er hebben nog meerdere vakken hulpverlening nodig.':`Gemist: ${lastReport.missed} · overzicht ${lastReport.sO.toFixed(1).replace('.',',')}. Probeer een plek aan de wand bij het hulpvak, met de zaal voor je.`,ok:'Precies het dilemma van hulpverlenen: met één hulpvak en een slimme plek houd je overzicht.'},
+ {t:'T2',type:'sim',q:'Maak de klas lastig: groep 4, <b>30 leerlingen</b>, <b>8 drukke leerlingen</b>. Richt de zaal in en geef les. Doel: <b>rust ≥ 6</b> en <b>balans ≥ 6</b>.',check:()=>lastReport&&KC.N>=30&&KC.druk>=8&&lastReport.sR>=6&&lastReport.bal>=6,fail:()=>KC.N<30||KC.druk<8?'Zet eerst bij Klas & les: 30 leerlingen en 8 drukke leerlingen.':!lastReport?'Geef eerst een les.':`Rust ${lastReport.sR.toFixed(1).replace('.',',')} · balans ${lastReport.bal.toFixed(1).replace('.',',')}. Kortere rijen, kortere uitleg en drukke leerlingen in je blikveld helpen.`,ok:'Knap! Onrust is vooral een organisatieprobleem: wie beweegt, hoeft niet te rommelen.'},
+ {t:'I',type:'open',q:'Ontwerp een les in drie vakken voor groep 6 (27 leerlingen) rond <b>springen, zwaaien en balanceren</b>. Leg in 6 à 8 zinnen uit hoe je opstelling zorgt voor <b>bewegingstijd, veiligheid, overzicht en rust</b>, en welke keuze je bewust anders zou doen bij een drukke klas.',
+  model:'<p>Bijvoorbeeld: vak 1 is het <b>hulpverleningsvak</b> met een hoge kast én een lage bok naast elkaar, allebei met de juiste mat en een vrije uitloop van de muur af. Ik sta aan de lange wand naast de kast, zodat ik help én de zaal in kijk. Vak 2 heeft twee paar ringen laag (zittend zwaaien) op een dunne mat: veilig zelfstandig. Vak 3 heeft twee banken (breed en smal) en een balk: drie plekken, dus korte rijen en differentiatie. De uitleg is kort (1 minuut) en de klas zit met de rug naar de ramen. Bij een drukke klas zet ik de drukke leerlingen in de groep die begint in het vak vlak bij mij, maak ik de rondes korter en zorg ik voor nog meer plekken per vak, zodat niemand lang hoeft te wachten.</p>'},
+];
+let quizOpen=false,qi=0,qres=[],qDone=false,QMK=[];
+function openQuiz(){closeInfo();quizOpen=true;$('#quiz').classList.add('open');qi=0;qres=QUIZ.map(()=>null);renderQ();}
+function closeQuiz(){if(!quizOpen)return;quizOpen=false;$('#quiz').classList.remove('open');}
+function dots(){return QUIZ.map((q,j)=>`<i class="${j===qi?'cur':qres[j]===true?'ok':qres[j]===false?'no':''}"></i>`).join('');}
+function renderQ(){qDone=false;$('#qNext').disabled=true;
+  if(qi>=QUIZ.length){const ok=qres.filter(x=>x===true).length;$('#qBody').innerHTML=`<div class="dots">${dots()}</div><p class="qprompt">Alle missies gedaan!</p><p>${ok} van de ${QUIZ.length-1} in één keer goed. Neem je slotontwerp mee naar je stageschool en vergelijk het met de echte zaal.</p><p><button class="btn" id="qAgain">Opnieuw</button></p>`;$('#qAgain').onclick=()=>{qi=0;qres=QUIZ.map(()=>null);renderQ();};$('#qPos').textContent='';$('#qNext').style.display='none';return;}
+  $('#qNext').style.display='';const q=QUIZ[qi];$('#qPos').textContent=`Missie ${qi+1} van ${QUIZ.length}`;if(q.preset&&$('#preset').value!==q.preset){setMode('edit');loadPreset(q.preset);}
+  let h=`<div class="dots">${dots()}</div><p class="qprompt"><span class="qtag">${q.t}</span>${q.q}</p>`;
+  if(q.type==='multi'){h+=`<div class="opts">${q.opts.map((o,j)=>`<label><input type="checkbox" value="${j}">${o}</label>`).join('')}</div><p><button class="btn acc" id="qGo">Controleer</button></p><div id="qfb"></div>`;$('#qBody').innerHTML=h;
+    $('#qGo').onclick=()=>{const sel=$$('#qBody input:checked').map(x=>+x.value).sort();const ok=sel.length===q.ok.length&&sel.every((v,k)=>v===q.ok[k]);if(qres[qi]===null)qres[qi]=ok;
+      $$('#qBody .opts label').forEach((l,j)=>{l.classList.remove('right','wrong');if(q.ok.includes(j))l.classList.add('right');else if(sel.includes(j))l.classList.add('wrong');});
+      $('#qfb').innerHTML=`<div class="fb ${ok?'ok':'no'}">${ok?'<b>Goed.</b> ':'<b>Nog niet helemaal.</b> Groen zijn de echte fouten. '}${q.ex}</div>`;qDone=true;$('#qNext').disabled=false;};}
+  else if(q.type==='mc'){h+='<div class="opts">'+q.opts.map((o,j)=>`<button data-j="${j}"><b>${'ABCD'[j]}</b>${o}</button>`).join('')+'</div><div id="qfb"></div>';$('#qBody').innerHTML=h;
+    $$('#qBody .opts button').forEach(b=>b.onclick=()=>{if(qDone)return;const j=+b.dataset.j;if(qres[qi]===null)qres[qi]=j===q.ok;b.classList.add(j===q.ok?'right':'wrong');if(j===q.ok){qDone=true;$('#qNext').disabled=false;}$('#qfb').innerHTML=`<div class="fb ${j===q.ok?'ok':'no'}">${j===q.ok?'<b>Goed.</b> '+q.ex:'<b>Nog niet.</b> Probeer het in de lesmodus uit.'}</div>`;});}
+  else if(q.type==='num'){h+=`<div class="num-in"><input id="qNum" inputmode="decimal"><span>${q.unit}</span><button class="btn acc" id="qGo">Controleer</button></div><div id="qfb"></div>`;$('#qBody').innerHTML=h;
+    $('#qGo').onclick=()=>{const v=parseFloat(($('#qNum').value||'').replace(',','.'));const ok=Math.abs(v-q.answer)<=q.tol;if(qres[qi]===null)qres[qi]=ok;$('#qfb').innerHTML=`<div class="fb ${ok?'ok':'no'}">${ok?'<b>Goed.</b> '+q.ex:'<b>Nog niet.</b> Hoeveel starts zijn er in 360 seconden?'}</div>`;if(ok){qDone=true;$('#qNext').disabled=false;}};}
+  else if(q.type==='sim'){h+='<p><button class="btn acc" id="qGo">Controleer mijn laatste les</button></p><div id="qfb"></div><p class="hint">Geef les tot het lesrapport verschijnt (tempo ×20 gaat snel) en klik dan op Controleer.</p>';$('#qBody').innerHTML=h;
+    $('#qGo').onclick=()=>{const ok=q.check();if(qres[qi]===null)qres[qi]=ok;$('#qfb').innerHTML=`<div class="fb ${ok?'ok':'no'}">${ok?'<b>Gelukt!</b> '+q.ok:'<b>Nog niet.</b> '+q.fail()}</div>`;if(ok){qDone=true;$('#qNext').disabled=false;}};}
+  else{h+='<textarea placeholder="Schrijf je verantwoording hier. Het wordt nergens opgeslagen."></textarea><p><button class="btn" id="qShow">Toon een voorbeeld</button></p><div id="qfb"></div>';$('#qBody').innerHTML=h;$('#qShow').onclick=()=>{$('#qfb').innerHTML=`<div class="fb ok">${q.model}</div>`;qres[qi]='open';};$('#qNext').disabled=false;}}
+$('#qNext').onclick=()=>{qi++;renderQ();};$('#qClose').onclick=closeQuiz;$('#bQuiz').onclick=()=>quizOpen?closeQuiz():openQuiz();
+
+/* ================= UI: tools / selection ================= */
+const RISKL=['geen','laag','laag','middel','hoog'];
+$('#toolGrid').innerHTML=TOOLS.map(k=>{const T=TYPES[k];const r=Math.max(...Object.values(T.variants).map(v=>v.risk));return `<button class="tool" data-tool="${k}"><b>${T.name}</b><small>${ACT_LABEL[T.act]}</small><i class="r${r}">risico ${RISKL[r]}</i></button>`;}).join('');
+let placing=null,ghost=null;
+$$('[data-tool]').forEach(b=>b.addEventListener('click',()=>{if(mode!=='edit')setMode('edit');placing=placing===b.dataset.tool?null:b.dataset.tool;$$('[data-tool]').forEach(x=>x.classList.toggle('on',x.dataset.tool===placing));if(ghost){scene.remove(ghost.g);ghost=null;}
+  if(placing){const T=TYPES[placing];ghost={type:placing,x:0,z:0,rot:0,variant:defVariant(placing),mat:T.variants[defVariant(placing)].mat||'geen'};buildStationMesh.call(null,ghost);stG.remove(ghost.g);scene.add(ghost.g);ghost.g.traverse(o=>{if(o.material&&o.material.clone){o.material=o.material.clone();o.material.transparent=true;o.material.opacity=.5;}});toast('Klik op de vloer om de '+T.name.toLowerCase()+' neer te zetten');}}));
+function select(st){selected=st;renderSelCard();buildOverlays();}
+function renderSelCard(){const el=$('#selCard');if(!selected||!stations.includes(selected)){el.innerHTML='';return;}const st=selected,T=TYPES[st.type],v=vOf(st);
+  const vs=Object.entries(T.variants);
+  el.innerHTML=`<div class="card"><div class="row"><b>${T.name}</b><span class="hint">vak ${st.vak+1} · ${ACT_LABEL[T.act]}</span></div>
+   ${vs.length>1?`<div class="row"><label>Variant</label><select id="sVar">${vs.map(([k,o])=>`<option value="${k}" ${k===st.variant?'selected':''}>${o.label}</option>`).join('')}</select></div>`:`<div class="row"><label>Variant</label><span>${v.label}</span></div>`}
+   ${T.val?`<div class="row"><label>Mat</label><select id="sMat">${['geen','dun','dik'].map(m=>`<option value="${m}" ${m===st.mat?'selected':''}>${m==='geen'?'geen mat':m==='dun'?'dunne mat':'dikke valmat'}</option>`).join('')}</select></div>`:''}
+   <div class="row"><label>Risico</label><span>${RISKL[v.risk]}${v.hulp?' · hulpverlening nodig':''}</span></div>
+   <div class="row"><label>Plekken tegelijk</label><span>${T.lanes.length*T.cap}</span></div>
+   <div style="display:flex;gap:6px;margin-top:6px">${T.wall?'':'<button class="btn" id="sRot">⟳ Draai (R)</button>'}<button class="btn red" id="sDel">Verwijder</button></div></div>`;
+  const sv=$('#sVar');if(sv)sv.onchange=()=>{st.variant=sv.value;const nv=vOf(st);if(nv.mat==='dik'&&st.mat==='dun')toast('Let op: deze variant vraagt om een dikke valmat');buildStationMesh(st);layoutChanged();};
+  const sm=$('#sMat');if(sm)sm.onchange=()=>{st.mat=sm.value;buildStationMesh(st);layoutChanged();};
+  const sr=$('#sRot');if(sr)sr.onclick=()=>rotateSel();$('#sDel').onclick=()=>removeStation(st);}
+function rotateSel(){if(!selected||TYPES[selected.type].wall)return;selected.rot=(selected.rot+1)%4;clampStation(selected);layoutChanged();}
+function refreshHelpSelect(){const s=$('#tHelp');const cur=teacher.help;s.innerHTML='<option value="">niemand (overzicht)</option>'+stations.filter(x=>TYPES[x.type].val||vOf(x).hulp).map(x=>`<option value="${x.id}" ${x.id===cur?'selected':''}>${TYPES[x.type].name} (vak ${x.vak+1})${vOf(x).hulp?' · hulp nodig':''}</option>`).join('');}
+$('#tHelp').onchange=e=>{teacher.help=e.target.value?+e.target.value:null;if(!teacher.help){teacher.x=SIM.teacherHome?SIM.teacherHome.x:teacher.x;}};
+$('#tAuto').onchange=e=>{teacher.auto=e.target.checked;$('#rFace').disabled=teacher.auto;};
+$('#rFace').oninput=e=>{teacher.manualFace=(+e.target.value)*D2R;$('#oFace').textContent=e.target.value+'°';};
+$('#tCone').onchange=e=>{coneG.visible=e.target.checked;};
+$$('[data-tp]').forEach(b=>b.onclick=()=>{const k=b.dataset.tp;teacher.help=null;$('#tHelp').value='';teacher.dragged=true;const P={wall:[0,6.3],mid:[0,0],corner:[-10.2,-6.2],vak2:[VAKX[1],0]}[k];teacher.x=teacher.homeX=P[0];teacher.z=teacher.homeZ=P[1];SIM.teacherHome={x:teacher.x,z:teacher.z};});
+
+/* ================= modes ================= */
+let mode='edit';
+function setMode(m){mode=m;document.body.classList.toggle('mode-edit',m==='edit');document.body.classList.toggle('mode-run',m==='run');$$('[data-mode]').forEach(b=>b.classList.toggle('on',b.dataset.mode===m));
+  if(placing){placing=null;$$('[data-tool]').forEach(x=>x.classList.remove('on'));if(ghost){scene.remove(ghost.g);ghost=null;}}
+  if(m==='edit'){SIM.on=false;showOverlay=true;buildOverlays();setLeftTab('tools');flyTo([1.8,29,15],[1.8,0,1.4]);kidG.visible=false;coneG.visible=false;tG.visible=true;updateEditHud();}
+  else{selected=null;renderSelCard();showOverlay=false;buildOverlays();setLeftTab('teach');kidG.visible=true;coneG.visible=$('#tCone').checked;flyTo([3,18,22],[1.8,0,1.2]);startLesson();}}
+function setLeftTab(k){$$('[data-lt]').forEach(b=>b.classList.toggle('on',b.dataset.lt===k));['tools','teach','klas','check'].forEach(x=>$('#lt-'+x).style.display=x===k?'flex':'none');}
+$$('[data-lt]').forEach(b=>b.onclick=()=>setLeftTab(b.dataset.lt));
+$$('[data-mode]').forEach(b=>b.onclick=()=>setMode(b.dataset.mode));
+$('#preset').onchange=e=>loadPreset(e.target.value);
+function bindR(id,out,f,key,after){const el=$(id);el.oninput=()=>{KC[key]=+el.value;$(out).textContent=f(+el.value);};el.onchange=()=>{after&&after();};}
+const reClass=()=>{makeClass();layoutChanged();if(mode==='run')startLesson();};
+bindR('#kN','#oN',v=>v,'N',reClass);bindR('#kDruk','#oDruk',v=>v,'druk',reClass);bindR('#kAng','#oAng',v=>v,'ang',reClass);bindR('#lRonde','#oRonde',v=>v+' min','ronde',()=>{layoutChanged();if(mode==='run')startLesson();});
+$('#kGroep').onchange=e=>{KC.groep=+e.target.value;reClass();};$('#kDcd').onchange=e=>{KC.dcd=e.target.checked;reClass();};$('#kIndel').onchange=e=>{KC.indel=e.target.value;reClass();};
+$('#kNew').onclick=()=>{classSeed++;reClass();toast('Nieuwe klas gemaakt');};
+$('#lInstr').onchange=e=>{KC.instr=e.target.value;if(mode==='run')startLesson();};$('#lInstrT').onchange=e=>{KC.instrT=+e.target.value;if(mode==='run')startLesson();};$('#lRot').onchange=e=>{KC.rot=+e.target.value;if(mode==='run')startLesson();};
+$('#bPlay').onclick=()=>{SIM.paused=!SIM.paused;$('#bPlay').textContent=SIM.paused?'▶':'⏸';};
+$$('[data-sp]').forEach(b=>b.onclick=()=>{SIM.speed=+b.dataset.sp;$$('[data-sp]').forEach(x=>x.classList.toggle('on',x===b));});
+function updateEditHud(crit,warn){if(crit===undefined){crit=issues.filter(i=>i.sev==='crit').length;warn=issues.length-crit;}
+  $('#clk').textContent=stations.length+'';$('#clkS').textContent='TOESTELLEN';
+  const gs=Math.round(KC.N/3);const lanes=[0,1,2].map(k=>stations.filter(s=>s.vak===k).reduce((a,s)=>a+TYPES[s.type].lanes.length*TYPES[s.type].cap,0));
+  const k=(id,v,e,c)=>{$('#'+id+'v').textContent=v;$('#'+id+'e').textContent=e;const el=$('#'+id);el.className='kpi'+(c?' '+c:'');};
+  setKpiLabels(['Plekken per vak','Wachtrij','Hulpvakken','Kritiek','Aandacht']);
+  const minL=Math.min(...lanes);
+  k('k1',lanes.join(' · '),'plekken per vak',minL>=3?'g':minL>=2?'y':'o');
+  k('k2',minL?`± ${Math.ceil(gs/minL-1)}`:'–','wachtend in drukste vak',minL&&gs/minL-1<=3?'g':minL&&gs/minL-1<=5?'y':'o');
+  const hv=new Set(stations.filter(s=>vOf(s).hulp).map(s=>s.vak)).size;k('k3',hv+'','vak(ken) met hulpverlening',hv<=1?'g':'o');
+  k('k4',crit+'','kritieke punten',crit?'r':'g');k('k5',warn+'','aandachtspunten',warn>2?'o':warn?'y':'g');
+  $('#capT').textContent='Inrichten';$('#capX').innerHTML=crit?'Los eerst de <b>rode punten</b> op (tabblad Check). Klik op een punt om het toestel te zien.':'De zaal is klaar. Start de les en kijk wat de klas ermee doet.';
+  $('#capA').innerHTML='<button class="btn acc" id="goRun">▶ Start de les</button><button class="btn" id="goCheck">Check</button>';$('#goRun').onclick=()=>setMode('run');$('#goCheck').onclick=()=>setLeftTab('check');}
+function setKpiLabels(a){a.forEach((t,i)=>{const el=document.querySelector('#k'+(i+1)+' small');if(el.textContent!==t)el.textContent=t;});}
+const PHLABEL={instr:'Uitleg',naar:'Naar de vakken',ronde:'Ronde',wissel:'Doordraaien',slot:'Afsluiting'};
+function updatePhaseCaption(){}
+function updateRunHud(){const p=curPhase();if(!p)return;$('#clk').textContent=fmtT(SIM.t);$('#clkS').textContent=(PHLABEL[p.k]+(p.k==='ronde'?' '+(p.r+1)+' van 3':'')).toUpperCase()+(SIM.paused?' · PAUZE':'');
+  setKpiLabels(['Bewegingstijd','Langste rij','In je blikveld','Onrust','Incidenten']);
+  const st=SIM.stats;const bew=st.roundT?st.active/st.roundT:0;const k=(id,v,e,c)=>{$('#'+id+'v').textContent=v;$('#'+id+'e').textContent=e;$('#'+id).className='kpi'+(c?' '+c:'');};
+  k('k1',st.roundT?pct(bew):'–','van de werktijd',st.roundT?(bew>=.6?'g':bew>=.45?'y':'o'):'');
+  k('k2',(SIM.curMaxQ||0)+'',`max deze les: ${st.maxQ}`,(SIM.curMaxQ||0)<=3?'g':(SIM.curMaxQ||0)<=5?'y':'o');
+  const z=SIM.curSeen||0;k('k3',pct(z),teacher.help?'je bent aan het hulpverlenen':'van de klas',z>=.85?'g':z>=.65?'y':'o');
+  const u=SIM.curUnrest||0;k('k4',pct(u),u<.3?'rustig':u<.5?'beetje onrustig':'onrustig',u<.3?'g':u<.5?'y':'r');
+  const inc=SIM.incidents.length,mis=SIM.incidents.filter(n=>n.done&&!n.seen).length;k('k5',inc+'',`${mis} gemist`,inc===0?'g':mis?'r':'y');
+  let X='';if(p.k==='instr')X=SIM.instrIssue==='tegenlicht'?'Uitleg aan de bank tegenover de ramen: de leerlingen kijken <b>tegen het licht</b> in.':SIM.instrIssue==='kring'?'Uitleg in een kring midden in de zaal.':'Uitleg aan de bank onder de ramen: leerlingen zitten met hun rug naar het licht.';
+  else if(p.k==='naar'||p.k==='wissel')X='Fluitsignaal: groepjes lopen naar hun vak. Sleep de docent naar een plek met overzicht.';
+  else if(p.k==='ronde')X=teacher.help?'Je verleent hulp. Let op wat er buiten je blikveld gebeurt.':'Groepjes werken in de vakken. Rode labels zijn incidenten die je niet ziet.';
+  else X='Afsluiting: iedereen terug naar de bank.';
+  $('#capT').textContent='Lesgeven';$('#capX').innerHTML=X;
+  if(!$('#capA').dataset.run){$('#capA').dataset.run=1;}
+  $('#capA').innerHTML='<button class="btn" id="goRestart">↻ Opnieuw</button><button class="btn" id="goEdit">Inrichten</button>';$('#goRestart').onclick=()=>startLesson();$('#goEdit').onclick=()=>setMode('edit');}
+
+/* ================= pointer interaction ================= */
+const ray=new THREE.Raycaster(),mouse=new THREE.Vector2(),plane=new THREE.Plane(new THREE.Vector3(0,1,0),0),hit=V(0,0,0);
+let drag=null,downP=null;
+function floorPoint(e){mouse.set(e.clientX/innerWidth*2-1,-(e.clientY/innerHeight)*2+1);ray.setFromCamera(mouse,camera);return ray.ray.intersectPlane(plane,hit)?hit.clone():null;}
+const snap=v=>Math.round(v*4)/4;
+canvas.addEventListener('pointerdown',e=>{downP=[e.clientX,e.clientY];mouse.set(e.clientX/innerWidth*2-1,-(e.clientY/innerHeight)*2+1);ray.setFromCamera(mouse,camera);
+  if(mode==='edit'){if(placing)return;const hits=ray.intersectObjects(stations.map(s=>s.pick),false);if(hits.length){const st=hits[0].object.userData.st;select(st);const fp=floorPoint(e);drag={st,ox:st.x-fp.x,oz:st.z-fp.z};controls.enabled=false;}
+    else{const th=ray.intersectObject(tPick,false);if(th.length){drag={teacher:true};controls.enabled=false;}}}
+  else{const th=ray.intersectObject(tPick,false);if(th.length){drag={teacher:true};controls.enabled=false;teacher.help=null;$('#tHelp').value='';return;}}});
+canvas.addEventListener('pointermove',e=>{const fp=floorPoint(e);if(!fp)return;
+  if(placing&&ghost){ghost.x=snap(fp.x);ghost.z=snap(fp.z);const T=TYPES[ghost.type];if(T.wall){ghost.z=ZZ-.05-2.25;ghost.x=clamp(ghost.x,WB_X0+1.6,WB_X1-1.6);}ghost.g.position.set(ghost.x,0,ghost.z);ghost.g.rotation.y=ghost.rot*Math.PI/2;}
+  if(drag){if(drag.st){drag.st.x=snap(fp.x+drag.ox);drag.st.z=snap(fp.z+drag.oz);clampStation(drag.st);computeWorld();buildOverlays();}
+    if(drag.teacher){teacher.x=clamp(fp.x,-ZX+.3,ZX-.3);teacher.z=clamp(fp.z,-ZZ+.3,ZZ-.3);teacher.dragged=true;teacher.homeX=teacher.x;teacher.homeZ=teacher.z;SIM.teacherHome={x:teacher.x,z:teacher.z};}}});
+addEventListener('pointerup',e=>{if(drag){if(drag.st)layoutChanged();drag=null;controls.enabled=true;return;}
+  if(!downP||Math.hypot(e.clientX-downP[0],e.clientY-downP[1])>6){downP=null;return;}downP=null;if(e.target!==canvas)return;
+  if(mode==='edit'&&placing){const fp=floorPoint(e);if(!fp)return;if(Math.abs(fp.x)>ZX||Math.abs(fp.z)>ZZ){toast('Zet het toestel in de zaal');return;}
+    const st=addStation(placing,snap(fp.x),snap(fp.z),ghost?ghost.rot:0);select(st);layoutChanged();SND.click();}
+  else if(mode==='edit'){mouse.set(e.clientX/innerWidth*2-1,-(e.clientY/innerHeight)*2+1);ray.setFromCamera(mouse,camera);const hits=ray.intersectObjects(stations.map(s=>s.pick),false);if(!hits.length){select(null);}}
+  else{mouse.set(e.clientX/innerWidth*2-1,-(e.clientY/innerHeight)*2+1);ray.setFromCamera(mouse,camera);const hits=ray.intersectObjects(kids.map(k=>k.pick),false);if(hits.length){showKidCard(hits[0].object.userData.kid,e.clientX,e.clientY);}else $('#scard').style.display='none';}});
+function showKidCard(i,x,y){const p=klas[i],s=S[i];if(!s)return;const el=$('#scard');const stn=stations.find(q=>q.id===s.station);
+  el.innerHTML=`<h5>${p.name}</h5><div class="row"><span>Groepje</span><b style="color:${GROUPS[p.group].css}">${GROUPS[p.group].name}</b></div><div class="row"><span>Type</span><b>${TYPE_INFO[p.type].label}</b></div><div class="row"><span>Niveau</span><b>${['','basis','gemiddeld','sterk'][p.skill]}</b></div><div class="row"><span>Beurten</span><b>${s.turns}</b></div><div class="row"><span>Bewogen</span><b>${SIM.stats&&SIM.stats.roundT?pct(s.active/Math.max(1,SIM.stats.roundT)):'–'}</b></div><div class="row"><span>Onrust</span><b>${pct(s.unrest)}</b></div><div class="row"><span>Nu</span><b>${{sit:'zit',walk:'loopt',wait:'wacht',idle:'verveelt zich',queue:'in de rij',exec:'oefent',return:'loopt terug',down:'gevallen',misb:'rommelt'}[s.st]||s.st}${stn?' · '+TYPES[stn.type].name.toLowerCase():''}</b></div>${s.refusals?`<div class="row"><span>Weigerde</span><b>${s.refusals}×</b></div>`:''}`;
+  el.style.display='block';el.style.left=Math.min(innerWidth-230,x+12)+'px';el.style.top=Math.max(10,y-120)+'px';}
+addEventListener('keydown',e=>{if(['TEXTAREA','INPUT','SELECT'].includes(e.target.tagName)&&e.target.type!=='range'&&e.target.type!=='checkbox')return;const k=e.key;
+  if(k==='r'||k==='R'){if(placing&&ghost){ghost.rot=(ghost.rot+1)%4;}else rotateSel();}
+  else if(k==='Delete'||k==='Backspace'){if(selected&&mode==='edit'){removeStation(selected);e.preventDefault();}}
+  else if(k==='Escape'){if(placing){placing=null;$$('[data-tool]').forEach(x=>x.classList.remove('on'));if(ghost){scene.remove(ghost.g);ghost=null;}}else if($('#report').classList.contains('open'))$('#report').classList.remove('open');else if($('#help').classList.contains('open'))$('#help').classList.remove('open');else if(document.body.classList.contains('present'))setPresent(false);else if(quizOpen)closeQuiz();else closeInfo();}
+  else if(k==='1')setMode('edit');else if(k==='2')setMode('run');
+  else if(k===' '){SIM.paused=!SIM.paused;$('#bPlay').textContent=SIM.paused?'▶':'⏸';e.preventDefault();}
+  else if(k==='ArrowRight'||k==='PageDown'){next();e.preventDefault();}else if(k==='ArrowLeft'||k==='PageUp'){prev();e.preventDefault();}
+  else if(k==='g'||k==='G')setSound(!SND.on);else if(k==='l'||k==='L')cycleLabels();});
+const LBL=['Stippen','Namen','Uit'];let lblI=0;function cycleLabels(){lblI=(lblI+1)%3;document.body.classList.remove('lbl-dots','lbl-names','lbl-off');document.body.classList.add(['lbl-dots','lbl-names','lbl-off'][lblI]);toast('Labels: '+LBL[lblI]);}
+$('#bHelp').onclick=()=>$('#help').classList.add('open');$('#helpClose').onclick=()=>$('#help').classList.remove('open');
+$('#bLeft').onclick=()=>document.body.classList.toggle('showleft');
+function setPresent(on){document.body.classList.toggle('present',on);$('#bPresent').classList.toggle('on',on);if(on){if(document.documentElement.requestFullscreen)document.documentElement.requestFullscreen().catch(()=>{});setSound(true);}else if(document.fullscreenElement)document.exitFullscreen().catch(()=>{});}
+$('#bPresent').onclick=()=>setPresent(!document.body.classList.contains('present'));
+
+/* ================= camera ================= */
+let fly=null;
+function flyTo(pos,tgt,dur){const p=V(...pos),t=V(...tgt);const asp=innerWidth/innerHeight;if(asp<1)p.sub(t).multiplyScalar(Math.min(1.9,1/Math.pow(asp,.85))).add(t);fly={p0:camera.position.clone(),t0:controls.target.clone(),p1:p,t1:t,k:0,dur:reduced?.01:(dur||1.3)};}
+controls.addEventListener('start',()=>{fly=null;});
+
+/* ================= sound ================= */
+const SND=(function(){let C=null,master,rev,noiseBuf,on=false,chatG,chatF;
+  function init(){if(C)return;C=new (window.AudioContext||window.webkitAudioContext)();master=C.createGain();master.gain.value=0;master.connect(C.destination);
+    rev=C.createConvolver();const len=C.sampleRate*1.8|0;const ir=C.createBuffer(2,len,C.sampleRate);for(let ch=0;ch<2;ch++){const d=ir.getChannelData(ch);for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/len,2.2);}rev.buffer=ir;const rg=C.createGain();rg.gain.value=.5;rev.connect(rg);rg.connect(master);
+    noiseBuf=C.createBuffer(1,C.sampleRate*2,C.sampleRate);const nd=noiseBuf.getChannelData(0);for(let i=0;i<nd.length;i++)nd[i]=Math.random()*2-1;
+    const s=C.createBufferSource();s.buffer=noiseBuf;s.loop=true;chatF=C.createBiquadFilter();chatF.type='bandpass';chatF.frequency.value=900;chatF.Q.value=1.2;chatG=C.createGain();chatG.gain.value=0;s.connect(chatF);chatF.connect(chatG);chatG.connect(master);chatG.connect(rev);s.start();}
+  function env(g,t0,a,p,d){g.gain.setValueAtTime(.0001,t0);g.gain.exponentialRampToValueAtTime(p,t0+a);g.gain.exponentialRampToValueAtTime(.0001,t0+a+d);}
+  function thump(f,dur,vol){const t=C.currentTime;const o=C.createOscillator();o.frequency.setValueAtTime(f,t);o.frequency.exponentialRampToValueAtTime(f*.5,t+dur);const g=C.createGain();env(g,t,.005,vol,dur);o.connect(g);g.connect(master);g.connect(rev);o.start(t);o.stop(t+dur+.05);}
+  return {set(v){init();on=v;C.resume();master.gain.setTargetAtTime(v?.8:0,C.currentTime,.2);},get on(){return on;},
+    tick(){if(!on||!C)return;const lvl=mode==='run'&&SIM.on&&!SIM.paused?.05+.14*(SIM.curUnrest||0):0;chatG.gain.setTargetAtTime(lvl,C.currentTime,.4);chatF.frequency.setTargetAtTime(800+800*(SIM.curUnrest||0),C.currentTime,.5);},
+    whistle(){if(!on||!C)return;const t=C.currentTime;[2800,3150].forEach(f=>{const o=C.createOscillator();o.frequency.value=f;const lfo=C.createOscillator();lfo.frequency.value=28;const lg=C.createGain();lg.gain.value=60;lfo.connect(lg);lg.connect(o.frequency);const g=C.createGain();env(g,t,.02,.08,.55);o.connect(g);g.connect(master);g.connect(rev);o.start(t);lfo.start(t);o.stop(t+.7);lfo.stop(t+.7);});},
+    go(type){if(!on||!C||Math.random()>.35)return;if(['kast','bok','tramp'].includes(type))setTimeout(()=>{if(on)thump(90,.25,.25);},400);else thump(160,.08,.06);},
+    ouch(){if(!on||!C)return;const t=C.currentTime;const o=C.createOscillator();o.type='triangle';o.frequency.setValueAtTime(880,t);o.frequency.exponentialRampToValueAtTime(440,t+.3);const g=C.createGain();env(g,t,.01,.12,.3);o.connect(g);g.connect(master);o.start(t);o.stop(t+.4);},
+    click(){if(!on||!C)return;thump(700,.04,.04);}};})();
+function whistle(){SND.whistle();}
+function setSound(v){SND.set(v);$('#bSound').classList.toggle('on',v);$('#sndWave').setAttribute('d',v?'M16 9a4 4 0 0 1 0 6M19 6a8 8 0 0 1 0 12':'M17 9l4 6M21 9l-4 6');}
+$('#bSound').onclick=()=>setSound(!SND.on);
+
+/* ================= loop ================= */
+function resize(){const w=innerWidth,h=innerHeight;renderer.setSize(w,h,false);renderer.setPixelRatio(Math.min(devicePixelRatio,2));camera.aspect=w/h;camera.fov=w/h<1?50:38;camera.updateProjectionMatrix();}
+addEventListener('resize',resize);resize();
+let last=performance.now(),clock=0,hudT=0,first=true;
+function renderKids(){S.forEach((s,i)=>{const k=kids[i];if(!k)return;const sitting=s.st==='sit';k.g.position.set(s.x,(s.y||0),s.z);k.g.rotation.y=s.face||0;
+  const bob=s.moving?Math.abs(Math.sin(clock*9+i))*.04:0;k.body.position.y=.72+bob;k.vest.position.y=.82+bob;k.head.position.y=1.2+bob;
+  k.g.scale.y=k.g.scale.x*(sitting?.62:1);k.l1.rotation.x=s.moving?Math.sin(clock*9+i)*.5:0;k.l2.rotation.x=-k.l1.rotation.x;
+  if(s.st==='down'){k.g.rotation.z=Math.PI/2*.9;k.g.position.y=.15;}else k.g.rotation.z=0;
+  k.ring.material.opacity=(mode==='run'&&coneG.visible&&s.seen)?.55:0;k.ring.material.color.set(s.unrest>.6?0xff5a4a:0xffcb3d);});}
+function frame(dt){clock+=dt;
+  if(mode==='run'&&SIM.on&&!SIM.paused&&!SIM.done){let sd=dt*SIM.speed;const n=Math.max(1,Math.ceil(sd/.1));for(let k=0;k<n;k++)simStep(sd/n);}
+  tG.position.set(teacher.x,0,teacher.z);tG.rotation.y=teacher.face;coneG.position.set(teacher.x,0,teacher.z);coneG.rotation.y=teacher.face-Math.PI/2;
+  if(mode==='run')renderKids();
+  if(fly){fly.k+=dt/fly.dur;const e=ease(fly.k);camera.position.lerpVectors(fly.p0,fly.p1,e);controls.target.lerpVectors(fly.t0,fly.t1,e);if(fly.k>=1)fly=null;}
+  controls.update();renderer.render(scene,camera);updateMarkers();
+  hudT+=dt;if(hudT>.2){hudT=0;if(mode==='run'&&SIM.on)updateRunHud();}SND.tick();
+  if(first){first=false;setTimeout(()=>$('#loader').classList.add('gone'),300);}}
+function loop(now){requestAnimationFrame(loop);const dt=Math.min(.05,(now-last)/1000);last=now;frame(dt);}
+makeClass();loadPreset('ssb');setMode('edit');camera.position.set(0,40,24);flyTo([1.8,29,15],[1.8,0,1.4],2.2);
+(function(){let seen=false;try{seen=!!window.localStorage.getItem('gymlab-help');window.localStorage.setItem('gymlab-help','1');}catch(e){}if(!seen)setTimeout(()=>$('#help').classList.add('open'),900);})();
+requestAnimationFrame(loop);
+window.__zaal={step:(n,d)=>{for(let i=0;i<n;i++)frame(d||1/60);},SIM,KC,get stations(){return stations;},issues:()=>issues,setMode,loadPreset,teacher,computeScores,S:()=>S,get lastReport(){return lastReport;}};
+})();
+</script>
+</body>
+</html>
