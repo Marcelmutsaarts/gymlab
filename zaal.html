@@ -347,7 +347,7 @@ box(.3,1.0,14.6,wallMat2,11.15,.5,0,hall);   // east wall (cut away)
 const winMat=new THREE.MeshStandardMaterial({color:0xcfe6ff,emissive:0x9cc8ff,emissiveIntensity:.55,roughness:.2});
 for(let k=0;k<6;k++){const x=-8.75+k*3.5;box(2.8,1.6,.05,winMat,x,4.2,-6.98,hall);box(2.8,.08,.12,trim,x,3.38,-6.95,hall);}
 const shaftMat=new THREE.MeshBasicMaterial({color:0xfff3d6,transparent:true,opacity:.07,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide});
-for(let k=0;k<6;k++){const g=new THREE.Mesh(new THREE.PlaneGeometry(2.8,7.5),shaftMat);g.position.set(-8.75+k*3.5+.6,2.4,-4.2);g.rotation.set(-1.05,0,0);hall.add(g);}
+
 // doors
 const doorMat=std(0x6a7f8a);box(.08,2.2,1.4,doorMat,-10.98,1.1,-3.5,hall);box(.08,2.2,1.4,doorMat,-10.98,1.1,3.5,hall);
 const lbl=(t,w,h,bg,fg)=>canvasTex(w,h,(x)=>{x.fillStyle=bg;x.fillRect(0,0,w,h);x.fillStyle=fg;x.font=`700 ${h*.5}px "Instrument Sans",Arial`;x.textAlign='center';x.textBaseline='middle';x.fillText(t,w/2,h/2+2);});
@@ -361,7 +361,7 @@ for(let x=WB_X0;x<=WB_X1+.01;x+=1){box(.08,2.7,.08,wbMat,x,1.35,6.85,wallbars);}
 for(let y=.25;y<2.7;y+=.24){const m=new THREE.Mesh(new THREE.CylinderGeometry(.025,.025,8,6),wbMat);m.rotation.z=Math.PI/2;m.position.set(-6,y,6.82);m.castShadow=true;wallbars.add(m);}
 // benches along walls (decor)
 // ceiling rails (visual)
-for(let x=-6;x<=6;x+=6){const r=mesh(new THREE.BoxGeometry(.15,.15,14),trim,[x,5.5,0],0,hall);r.castShadow=false;}
+
 
 /* ================= apparatus types ================= */
 const M={wood:std(0xc89a5c,{roughness:.55}),woodD:std(0x8a5f36),leather:std(0xe8d7b4,{roughness:.8}),brown:std(0x6b3f22,{roughness:.6}),
@@ -547,7 +547,7 @@ mesh(new THREE.SphereGeometry(.15,14,10),std(0xd9a27a),[0,1.72,0],0,tG);mesh(new
 [-.1,.1].forEach(x=>mesh(new THREE.CapsuleGeometry(.07,.55,3,6),std(0x1f2a44),[x,.35,0],0,tG));
 const tPick=new THREE.Mesh(new THREE.CylinderGeometry(.45,.45,2,8),new THREE.MeshBasicMaterial({visible:false}));tPick.position.y=1;tG.add(tPick);
 const FOV=120*D2R,CONE_R=11;
-const coneMat=new THREE.MeshBasicMaterial({color:0xffd23c,transparent:true,opacity:.16,depthWrite:false,side:THREE.DoubleSide});
+const coneMat=new THREE.MeshBasicMaterial({color:0xffd23c,transparent:true,opacity:.26,depthWrite:false,side:THREE.DoubleSide});
 const cone=new THREE.Mesh(new THREE.CircleGeometry(CONE_R,40,-FOV/2,FOV),coneMat);cone.rotation.x=-Math.PI/2;cone.position.y=.04;cone.renderOrder=2;
 const coneG=new THREE.Group();coneG.add(cone);scene.add(coneG);
 function sees(x,z){const dx=x-teacher.x,dz=z-teacher.z;const d=Math.hypot(dx,dz);if(d<1.2)return true;const a=Math.atan2(dx,dz);let diff=Math.abs(((a-teacher.face)+Math.PI*3)%TAU-Math.PI);return diff<=FOV/2;}
